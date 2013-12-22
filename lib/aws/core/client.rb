@@ -681,7 +681,7 @@ module AWS
         def load_api_config api_version
           lib = File.dirname(File.dirname(__FILE__))
           path = "#{lib}/api_config/#{service_name}-#{api_version}.yml"
-          YAML.load(File.read(path))
+          YAML.load(File.read(path), :safe => false)
         end
 
         # @param [Symbol] version
