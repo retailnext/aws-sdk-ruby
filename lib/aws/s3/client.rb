@@ -1,4 +1,4 @@
-# Copyright 2011-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Copyright 2011-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You
 # may not use this file except in compliance with the License. A copy of
@@ -1484,13 +1484,59 @@ module AWS
       #   @option options [required,String] :bucket_name
       #   @option options [required,String] :key
       #   @option options [String] :version_id
+      #   @option options [Time] :if_modified_since If specified, the
+      #     response will contain an additional `:modified` value that
+      #     returns true if the object was modified after the given
+      #     time.  If `:modified` is false, then the response
+      #     `:data` value will be `nil`.
+      #   @option options [Time] :if_unmodified_since If specified, the
+      #     response will contain an additional `:unmodified` value
+      #     that is true if the object was not modified after the
+      #     given time.  If `:unmodified` returns false, the `:data`
+      #     value will be `nil`.
+      #   @option options [String] :if_match If specified, the response
+      #     will contain an additional `:matches` value that is true
+      #     if the object ETag matches the value for this option.  If
+      #     `:matches` is false, the `:data` value of the
+      #     response will be `nil`.
+      #   @option options [String] :if_none_match If specified, the
+      #     response will contain an additional `:matches` value that
+      #     is true if and only if the object ETag matches the value for
+      #     this option.  If `:matches` is true, the `:data` value
+      #     of the response will be `nil`.
+      #   @option options [Range<Integer>] :range A byte range of data to request.
       #   @return [Core::Response]
-      object_method(:head_object, :head) do
+      object_method(:head_object, :head,
+                    :header_options => {
+                      :if_modified_since => "If-Modified-Since",
+                      :if_unmodified_since => "If-Unmodified-Since",
+                      :if_match => "If-Match",
+                      :if_none_match => "If-None-Match"
+                    }) do
 
         configure_request do |req, options|
           super(req, options)
           if options[:version_id]
             req.add_param('versionId', options[:version_id])
+          end
+
+          ["If-Modified-Since",
+           "If-Unmodified-Since"].each do |date_header|
+            case value = req.headers[date_header]
+            when DateTime
+              req.headers[date_header] = Time.parse(value.to_s).rfc2822
+            when Time
+              req.headers[date_header] = value.rfc2822
+            end
+          end
+
+          if options[:range]
+            range = options[:range]
+            if range.is_a?(Range)
+              offset = range.exclude_end? ? -1 : 0
+              range = "bytes=#{range.first}-#{range.last + offset}"
+            end
+            req.headers['Range'] = range
           end
         end
 
@@ -1834,6 +1880,12 @@ module AWS
       #     Controls whether Reduced Redundancy Storage is enabled for
       #     the object.  Valid values are 'STANDARD' and
       #     'REDUCED_REDUNDANCY'.
+      #   @option options [String] :metadata_directive ('COPY') Specify 'COPY' or
+      #     'REPLACE'.
+      #   @option options [String] :content_type
+      #   @option options [String] :content_encoding
+      #   @option options [String] :content_disposition
+      #   @option options [String] :cache_control
       #   @option options [String] :expires The date and time at which the
       #     object is no longer cacheable.
       #   @option options [String] :grant_read
@@ -1854,6 +1906,7 @@ module AWS
         :cache_control => 'Cache-Control',
         :metadata_directive => 'x-amz-metadata-directive',
         :content_type => 'Content-Type',
+        :content_encoding => 'Content-Encoding',
         :content_disposition => 'Content-Disposition',
         :expires => 'Expires',
       }) do

@@ -37,14 +37,22 @@ module AWS
         #   `:access_key_id` or the `:secret_access_key` can not be found.
         #
         def credentials
-          @cached_credentials ||= begin
-            creds = get_credentials
-            unless creds[:access_key_id] and creds[:secret_access_key]
-              raise Errors::MissingCredentialsError
-            end
-            creds
-          end
+          raise Errors::MissingCredentialsError unless set?
           @cached_credentials.dup
+        end
+
+        # @return [Boolean] Returns true if has credentials and it contains
+        #   at least the `:access_key_id` and `:secret_access_key`.
+        #
+        def set?
+          @cache_mutex ||= Mutex.new
+          unless @cached_credentials
+            @cache_mutex.synchronize do
+              @cached_credentials ||= get_credentials
+            end
+          end
+          @cached_credentials[:access_key_id] &&
+            @cached_credentials[:secret_access_key]
         end
 
         # @return [String] Returns the AWS access key id.
@@ -108,6 +116,7 @@ module AWS
           @providers = []
           @providers << StaticProvider.new(static_credentials)
           @providers << ENVProvider.new('AWS')
+          @providers << ENVProvider.new('AWS', :access_key_id => 'ACCESS_KEY', :secret_access_key => 'SECRET_KEY', :session_token => 'SESSION_TOKEN')
           @providers << ENVProvider.new('AMAZON')
           @providers << EC2Provider.new
         end
@@ -117,12 +126,15 @@ module AWS
 
         def credentials
           providers.each do |provider|
-            begin
+            if provider.set?
               return provider.credentials
-            rescue Errors::MissingCredentialsError
             end
           end
           raise Errors::MissingCredentialsError
+        end
+
+        def set?
+          providers.any?(&:set?)
         end
 
         def refresh
@@ -181,8 +193,9 @@ module AWS
         include Provider
 
         # @param [String] prefix The prefix to apply to the ENV variable.
-        def initialize prefix
+        def initialize(prefix, suffixes=Hash[KEYS.map{|key| [key, key.to_s.upcase]}])
           @prefix = prefix
+          @suffixes = suffixes
         end
 
         # @return [String]
@@ -192,7 +205,7 @@ module AWS
         def get_credentials
           credentials = {}
           KEYS.each do |key|
-            if value = ENV["#{@prefix}_#{key.to_s.upcase}"]
+            if value = ENV["#{@prefix}_#{@suffixes[key]}"]
               credentials[key] = value
             end
           end
@@ -313,7 +326,7 @@ module AWS
         #   `:access_key_id` or the `:secret_access_key` can not be found.
         #
         def credentials
-          if @credentials_expiration && @credentials_expiration.utc <= Time.now.utc - 5 * 60
+          if @credentials_expiration && @credentials_expiration.utc <= (Time.now.utc + (15 * 60))
             refresh
           end
           super

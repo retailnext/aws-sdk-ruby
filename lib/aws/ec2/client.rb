@@ -17,13 +17,17 @@ module AWS
     # Client class for Amazon Elastic Compute Cloud (EC2).
     class Client < Core::QueryClient
 
-      API_VERSION = '2013-10-15'
+      API_VERSION = '2014-02-01'
 
       def sign_request request
-        if @region =~ /^cn-/
-          v4_signer.sign_request(request)
+        version = @config.ec2_signature_version ?
+          @config.ec2_signature_version.to_sym :
+          (@region =~ /cn-/ ? :v4 : :v2)
+        case version
+        when :v4 then v4_signer.sign_request(request)
+        when :v2 then v2_signer.sign_request(request)
         else
-          v2_signer.sign_request(request)
+          raise "invalid signature version #{version.inspect}"
         end
       end
 
@@ -91,6 +95,10 @@ module AWS
 
     class Client::V20131015 < Client
       define_client_methods('2013-10-15')
+    end
+
+    class Client::V20140201 < Client
+      define_client_methods('2014-02-01')
     end
 
   end

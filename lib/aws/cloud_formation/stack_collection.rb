@@ -159,7 +159,17 @@ module AWS
       #     puts stack.name
       #   end
       #
-      # @param [Symbol,String] status_filter A status to filter stacks with.
+      # You can provide multiple statuses:
+      #
+      #   statuses = [:create_failed, :rollback_failed]
+      #   cloud_formation.stacks.with_status(statuses).each do |stack|
+      #     puts stack.name
+      #   end
+      #
+      # Status names may be symbolized (snake-cased) or upper-cased strings
+      # (e.g. :create_in_progress, 'CREATE_IN_PROGRESS').
+      #
+      # @param [Symbol,String] status_filters A status to filter stacks with.
       #   Valid values include:
       #
       #     * `:create_in_progress`
@@ -182,10 +192,9 @@ module AWS
       # @return [StackCollection] Returns a new stack collection that
       #   filters the stacks returned by the given status.
       #
-      def with_status status_filter
-        StackCollection.new(
-          :status_filters => @status_filters + [status_filter.to_s.upcase],
-          :config => config)
+      def with_status *status_filters
+        filters = @status_filters + status_filters.flatten.map(&:to_s).map(&:upcase)
+        StackCollection.new(:status_filters => filters, :config => config)
       end
 
       protected

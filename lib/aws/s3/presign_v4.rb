@@ -39,7 +39,14 @@ module AWS
       # @return (see S3Object#url_for)
       def presign(method, options = {})
 
-        now = Time.now.utc.strftime("%Y%m%dT%H%M%SZ")
+        now = Time.now.utc
+        one_week = 60 * 60 * 24 * 7
+        if options[:expires] - now.to_i > one_week
+          msg = "presigned URLs using sigv4 may not expire more than one week out"
+          raise ArgumentError, msg
+        end
+
+        now = now.strftime("%Y%m%dT%H%M%SZ")
 
         request = build_request(method, options)
 
@@ -47,16 +54,12 @@ module AWS
         request.headers['host'] = request.host
         signed_headers = 'Host'
 
-        # must be sent along with the PUT request headers
         if options[:acl]
-          request.headers['X-Amz-Acl'] = options[:acl].to_s.gsub(/_/, '-')
-          signed_headers << ';X-Amz-Acl'
+          request.add_param("X-Amz-Acl", options[:acl].to_s.gsub(/_/, '-'))
         end
 
-        # must be sent along with the PUT request headers
         if options[:content_md5]
-          request.headers['Content-MD5'] = options[:content_md5]
-          signed_headers << ';Content-MD5'
+          request.add_param("Content-MD5", options[:content_md5])
         end
 
         request_params = Core::Signers::S3::QUERY_PARAMS.map do |p|
@@ -96,6 +99,7 @@ module AWS
         when :get, :read then :get_object
         when :put, :write then :put_object
         when :delete then :delete_object
+        when :head then :head_object
         else
           msg = "invalid method, expected :get, :put or :delete, got "
           msg << method.inspect

@@ -123,7 +123,7 @@ module AWS
   # In the following example we release all elastic IP addresses that are
   # not currently associated with an instance:
   #
-  #     ec2.select{|ip| !ip.associated? }.each(&:release)
+  #     ec2.elastic_ips.select{|ip| !ip.associated? }.each(&:release)
   #
   # ## Key Pairs
   #
@@ -231,7 +231,6 @@ module AWS
     autoload :BlockDeviceMappings, 'aws/ec2/block_device_mappings'
     autoload :Client, 'aws/ec2/client'
     autoload :Collection, 'aws/ec2/collection'
-    autoload :ConfigTransform, 'aws/ec2/config_transform'
     autoload :CustomerGateway, 'aws/ec2/customer_gateway'
     autoload :CustomerGatewayCollection, 'aws/ec2/customer_gateway_collection'
     autoload :DHCPOptions, 'aws/ec2/dhcp_options'

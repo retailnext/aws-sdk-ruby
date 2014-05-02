@@ -228,8 +228,18 @@ module AWS
           def new options = {}
             options = pool_options(options)
             @pools_mutex.synchronize do
-              @pools[options] ||= super(options)
+              @pools[options] ||= build(options)
             end
+          end
+
+          # Constructs and returns a new connection pool.  This pool is never
+          # shared.
+          # @option (see new)
+          # @return [ConnectionPool]
+          def build(options = {})
+            pool = allocate
+            pool.send(:initialize, pool_options(options))
+            pool
           end
 
           # @return [Array<ConnectionPool>] Returns a list of of the constructed
@@ -277,8 +287,18 @@ module AWS
           args << endpoint.port
           args << proxy_uri.host
           args << proxy_uri.port
-          args << proxy_uri.user
-          args << proxy_uri.password
+          
+          if proxy_uri.user
+            args << URI::decode(proxy_uri.user)
+          else
+            args << nil
+          end
+          
+          if proxy_uri.password
+            args << URI::decode(proxy_uri.password)
+          else 
+            args << nil
+          end
 
           http = Net::HTTP.new(*args.compact)
           http.extend(SessionExtensions)

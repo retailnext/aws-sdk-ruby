@@ -12,6 +12,7 @@
 # language governing permissions and limitations under the License.
 
 require 'set'
+require 'securerandom'
 
 # AWS is the root module for all of the Amazon Web Services.  It is also
 # where you can configure you access to AWS.
@@ -657,6 +658,7 @@ module AWS
           end
         end
       end
+      visited
     end
 
     # Patches Net::HTTP, fixing a bug in how it handles non 100-continue
@@ -698,4 +700,16 @@ module AWS
     require "aws/#{svc.old_name}/config"
   end
 
+end
+
+# Backport SecureRandom.uuid for Ruby 1.8
+unless SecureRandom.respond_to?(:uuid)
+  module SecureRandom
+    def self.uuid
+      ary = random_bytes(16).unpack("NnnnnN")
+      ary[2] = (ary[2] & 0x0fff) | 0x4000
+      ary[3] = (ary[3] & 0x3fff) | 0x8000
+      "%08x-%04x-%04x-%04x-%04x%08x" % ary
+    end
+  end
 end

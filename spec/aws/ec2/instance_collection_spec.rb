@@ -31,11 +31,11 @@ module AWS
             [double("reservation 1",
                     :instances_set =>
                     [double("inst 1",
-                            :instance_id => "i-123")]),
+                            :instance_id => "i-123", :image_id => 'img-123').as_null_object]),
              double("reservation 2",
                     :instances_set =>
                     [double("inst 2",
-                            :instance_id => "i-123")])]
+                            :instance_id => "i-123").as_null_object])]
           resp.stub(:reservation_set).and_return(reservations)
         end
 
@@ -302,6 +302,17 @@ module AWS
                 :dedicated_tenancy => true)
             end
 
+            it 'should send Placement.GroupName' do
+
+              client.should_receive(:run_instances).
+                with(hash_including(:placement => { :group_name => "pg-1" })).
+                and_return(resp)
+
+              collection.create(
+                :image_id => "ami-123",
+                :placement_group => "pg-1")
+            end
+
             it 'should accept tenancy with an availability zone' do
               client.should_receive(:run_instances).
                 with(hash_including(:placement => {
@@ -340,8 +351,7 @@ module AWS
 
             it 'should provide a UUID client token' do
               uuid = "ee819144-6d1f-11e0-bf36-00254bfffeb7"
-              UUIDTools::UUID.stub(:timestamp_create).
-                and_return(uuid)
+              SecureRandom.stub(:uuid).and_return(uuid)
               client.should_receive(:run_instances).
                 with(hash_including(:client_token => uuid)).
                 and_return(resp)

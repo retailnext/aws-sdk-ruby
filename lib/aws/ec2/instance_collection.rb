@@ -12,7 +12,6 @@
 # language governing permissions and limitations under the License.
 
 require 'base64'
-require 'uuidtools'
 
 module AWS
   class EC2
@@ -118,6 +117,9 @@ module AWS
       #   availability zone where the instance should run.  Without
       #   this option, EC2 will choose an availability zone for you.
       #
+      # @option options [String] :placement_group Specifies the
+      #   cluster placement group where the instance should run.
+      #
       # @option options [String] :image_id ID of the AMI you want to
       #   launch.
       #
@@ -199,6 +201,8 @@ module AWS
       #   *NOTE:* EBS Optimized instances incur an additional service charge. This
       #   optional is only valid for certain instance types.
       #
+      # @option options [Boolean] :associate_public_ip_address (false)
+      #
       # @return [Instance or Array] If a single instance is being created,
       #   this returns an {EC2::Instance} to represent the newly
       #   created instance.  Otherwise it returns an array of instance
@@ -255,6 +259,11 @@ module AWS
           options.delete(:availability_zone)
         end
 
+        if options[:placement_group]
+          placement[:group_name] = options[:placement_group].to_s
+          options.delete(:placement_group)
+        end
+
         if options[:dedicated_tenancy]
           placement[:tenancy] = 'dedicated'
           options.delete(:dedicated_tenancy)
@@ -289,7 +298,7 @@ module AWS
 
         security_group_opts(options)
 
-        options[:client_token] = UUIDTools::UUID.timestamp_create.to_s
+        options[:client_token] = SecureRandom.uuid
 
         resp = client.run_instances(options)
 
@@ -308,7 +317,9 @@ module AWS
         response = filtered_request(:describe_instances)
         response.reservation_set.each do |reservation|
           reservation.instances_set.each do |i|
-            yield(Instance.new(i.instance_id, :config => config))
+            instance = Instance.new_from(:describe_instances, i,
+              i.instance_id, :config => config)
+            yield(instance)
           end
         end
       end

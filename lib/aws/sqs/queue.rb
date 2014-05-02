@@ -95,12 +95,12 @@ module AWS
       #   characters not included in the list, your request will be
       #   rejected.
       #
-      #   * #x9
-      #   * #xA
-      #   * #xD
-      #   * #x20 to #xD7FF
-      #   * #xE000 to #xFFFD
-      #   * #x10000 to #x10FFFF
+      #   * `#x9`
+      #   * `#xA`
+      #   * `#xD`
+      #   * `#x20` to `#xD7FF`
+      #   * `#xE000` to `#xFFFD`
+      #   * `#x10000` to `#x10FFFF`
       #
       # @param [Hash] options
       #
@@ -512,7 +512,7 @@ module AWS
       #   and optionally `:delay_seconds`.
       #
       # @raise [Errors::BatchSendError] Raises this error when one or more
-      #   of the messages failed to send, but others did.  On the raised
+      #   of the messages failed to send, but others did not.  On the raised
       #   object you can access a list of the messages that failed, and
       #   a list of messages that succeeded.
       #
