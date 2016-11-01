@@ -11,7 +11,7 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-require File.expand_path(File.dirname(__FILE__) + '/../samples_config')
+require 'aws-sdk'
 
 (queue_name,message) = ARGV
 unless queue_name and message
@@ -28,7 +28,7 @@ sqs = AWS::SQS.new
 puts "Creating queue '#{queue_name}' ..."
 q = nil
 begin
-  # Creates new queue or gets erxisting queue
+  # Creates new queue or gets existing queue
   q = sqs.queues.create queue_name
 rescue AWS::SQS::Errors::InvalidParameterValue => e
   puts "Invalid queue name '#{queue_name}'. "+e.message

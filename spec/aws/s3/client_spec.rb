@@ -55,6 +55,12 @@ module AWS
 
       it_should_behave_like "an aws client", :list_buckets
 
+      it 'supports configurable http read timeouts' do
+        client = Client.new(test_credentials.merge(:http_read_timeout => 1))
+        req = client.send(:build_request, :list_buckets, {})
+        req.read_timeout.should eq(1)
+      end
+
       shared_examples_for "handles modeled exception" do |code, base|
 
         klass = S3::Errors.const_get(code)
@@ -83,14 +89,14 @@ module AWS
               lambda { client.send(method, opts) }.
                 should raise_error(klass)
             end
-  
+
             it "should raise an instance of #{kind}" do
               lambda { client.send(method, opts) }.
                 should raise_error(kind)
             end
-  
+
           end
-  
+
         end
 
       end
@@ -123,7 +129,7 @@ module AWS
       end
 
       context 'cors', :cors => true do
-  
+
         let(:xml) { <<-XML.strip.xml_cleanup }
 <CORSConfiguration>
   <CORSRule>
@@ -300,7 +306,7 @@ module AWS
             request.querystring.should eq('logging=')
 
           end
-          
+
         end
 
         context '#get_bucket_logging' do
@@ -1510,6 +1516,10 @@ module AWS
 
         it_should_behave_like "accepts input data"
 
+        it_should_behave_like "sends option as header", :sse_customer_algorithm, "x-amz-server-side-encryption-customer-algorithm"
+        it_should_behave_like "sends option as header", :sse_customer_key, "x-amz-server-side-encryption-customer-key"
+        it_should_behave_like "sends option as header", :sse_customer_key_md5, "x-amz-server-side-encryption-customer-key-MD5"
+
       end
 
       context '#copy_object' do
@@ -1541,6 +1551,10 @@ module AWS
         it_should_behave_like "sends metadata headers", false
 
         it_should_behave_like "sends option as header", :content_type, "Content-Type"
+
+        it_should_behave_like "sends option as header", :sse_customer_algorithm, "x-amz-server-side-encryption-customer-algorithm"
+        it_should_behave_like "sends option as header", :sse_customer_key, "x-amz-server-side-encryption-customer-key"
+        it_should_behave_like "sends option as header", :sse_customer_key_md5, "x-amz-server-side-encryption-customer-key-MD5"
 
         it 'requires :copy_source' do
           opts.delete(:copy_source)
@@ -1585,6 +1599,11 @@ module AWS
         it_should_behave_like "sends option as header", :if_unmodified_since, "If-Unmodified-Since"
         it_should_behave_like "sends option as header", :if_match, "If-Match"
         it_should_behave_like "sends option as header", :if_none_match, "If-None-Match"
+		it_should_behave_like "sends option as header", :request_payer, "x-amz-request-payer"
+
+        it_should_behave_like "sends option as header", :sse_customer_algorithm, "x-amz-server-side-encryption-customer-algorithm"
+        it_should_behave_like "sends option as header", :sse_customer_key, "x-amz-server-side-encryption-customer-key"
+        it_should_behave_like "sends option as header", :sse_customer_key_md5, "x-amz-server-side-encryption-customer-key-MD5"
 
         it_should_behave_like "formats date header", :if_modified_since, "If-Modified-Since"
         it_should_behave_like "formats date header", :if_unmodified_since, "If-Unmodified-Since"
@@ -1700,6 +1719,10 @@ module AWS
         it_should_behave_like "sends option as header", :if_unmodified_since, "If-Unmodified-Since"
         it_should_behave_like "sends option as header", :if_match, "If-Match"
         it_should_behave_like "sends option as header", :if_none_match, "If-None-Match"
+
+        it_should_behave_like "sends option as header", :sse_customer_algorithm, "x-amz-server-side-encryption-customer-algorithm"
+        it_should_behave_like "sends option as header", :sse_customer_key, "x-amz-server-side-encryption-customer-key"
+        it_should_behave_like "sends option as header", :sse_customer_key_md5, "x-amz-server-side-encryption-customer-key-MD5"
 
         it_should_behave_like "formats date header", :if_modified_since, "If-Modified-Since"
         it_should_behave_like "formats date header", :if_unmodified_since, "If-Unmodified-Since"
@@ -1904,6 +1927,9 @@ module AWS
 
         it_should_behave_like "returns server_side_encryption"
 
+        it_should_behave_like "sends option as header", :sse_customer_algorithm, "x-amz-server-side-encryption-customer-algorithm"
+        it_should_behave_like "sends option as header", :sse_customer_key, "x-amz-server-side-encryption-customer-key"
+        it_should_behave_like "sends option as header", :sse_customer_key_md5, "x-amz-server-side-encryption-customer-key-MD5"
       end
 
       context '#list_multipart_uploads' do
@@ -1986,6 +2012,10 @@ module AWS
 
         it_should_behave_like "returns server_side_encryption"
 
+        it_should_behave_like "sends option as header", :sse_customer_algorithm, "x-amz-server-side-encryption-customer-algorithm"
+        it_should_behave_like "sends option as header", :sse_customer_key, "x-amz-server-side-encryption-customer-key"
+        it_should_behave_like "sends option as header", :sse_customer_key_md5, "x-amz-server-side-encryption-customer-key-MD5"
+
         it 'requires part_number' do
           opts.delete(:part_number)
           lambda { client.upload_part(opts) }.
@@ -1996,6 +2026,32 @@ module AWS
           should_add_param_as(:part_number, 'partNumber')
         end
 
+      end
+
+      context '200 response errors' do
+        {
+          :complete_multipart_upload => { :upload_id => 'upload-id', :parts => [{ :part_number => 1, :etag => 'etag1' }]},
+          :copy_object => { :copy_source => 'bucket/key' },
+          :copy_part => { :upload_id => 'upload-id', :copy_source => 'bucket/key', :part_number => 1 },
+        }.each do |operation_name, params|
+          it 'handles 200 errors in ##{operation_name} response' do
+            Kernel.stub(:sleep)
+            http_handler.should_receive(:handle).exactly(4).times do |req, resp|
+              resp.body = <<-BODY.strip
+<?xml version="1.0" encoding="UTF-8"?>
+<Error>
+  <Code>InternalError</Code>
+  <Message>We encountered an internal error. Please try again.</Message>
+  <RequestId>656c76696e6727732072657175657374</RequestId>
+  <HostId>Uuag1LuByRx9e6j5Onimru9pO4ZVKnJ2Qz7/C1NPcfTWAtRPfTaOFg==</HostId>
+</Error>
+              BODY
+            end
+            expect {
+              client.send(operation_name, { :bucket_name => 'bucket', :key => 'key' }.merge(params))
+            }.to raise_error(AWS::S3::Errors::InternalError)
+          end
+        end
       end
 
       context '#complete_multipart_upload' do
@@ -2186,11 +2242,11 @@ module AWS
       context '#valid_bucket_name?' do
 
         def should_pass(name)
-          client.valid_bucket_name?(name).should be_true
+          client.valid_bucket_name?(name).should be_truthy
         end
 
         def should_fail(name)
-          client.valid_bucket_name?(name).should be_false
+          client.valid_bucket_name?(name).should be_falsey
         end
 
         context 'accepts letters and' do
@@ -2268,11 +2324,11 @@ module AWS
       context '#dns_compatible_bucket_name?' do
 
         def should_pass(name)
-          client.dns_compatible_bucket_name?(name).should be_true
+          client.dns_compatible_bucket_name?(name).should be_truthy
         end
 
         def should_fail(name)
-          client.dns_compatible_bucket_name?(name).should be_false
+          client.dns_compatible_bucket_name?(name).should be_falsey
         end
 
         it 'should reject names that are not valid bucket names' do

@@ -76,25 +76,6 @@ module AWS
     #   true, AWS::DynamoDB::Errors::ProvisionedThroughputExceededException
     #   errors will be retried.
     #
-    # @attr_reader [Float] http_continue_timeout (1) The number of
-    #   seconds to wait for a "100-continue" response before sending the request
-    #   payload.  **This option has no effect unless the {#http_continue_threshold}
-    #   is configured to a positive integer and the payload exeedes the
-    #   threshold.** NOTE: currently there is a bug in Net::HTTP.
-    #   You must call `AWS.patch_net_http_100_continue!` for this feature to work.
-    #   Not supported in Ruby < 1.9.
-    #
-    # @attr_reader [Integer,false] http_continue_threshold (false) If a request
-    #   body exceedes the {#http_continue_threshold} size (in bytes), then
-    #   an "Expect" header will be added to the request with the value of
-    #   "100-continue".  This will cause the SDK to wait up to
-    #   {#http_continue_timeout} seconds for a 100 Contiue HTTP response
-    #   before sending the request payload.  By default, this feature
-    #   is disbled.  Set this option to a positive number of bytes
-    #   to enable 100 continues.  NOTE: currently there is a bug in Net::HTTP.
-    #   You must call `AWS.patch_net_http_100_continue!` for this feature to work.
-    #   Not supported in Ruby < 1.9.
-    #
     # @attr_reader [Object] http_handler The http handler that sends requests
     #   to AWS.  Defaults to an HTTP handler built on net/http.
     #
@@ -116,7 +97,8 @@ module AWS
     #
     # @attr_reader [Logger,nil] logger (nil) The logging interface.
     #
-    # @attr_reader [Symbol] log_level (:info) The log level.
+    # @attr_reader [Symbol] log_level (:info) The log level to use when
+    #   logging every API call.  Does not set the `:logger`'s log_level.
     #
     # @attr_reader [LogFormatter] log_formatter The log message formatter.
     #
@@ -199,6 +181,8 @@ module AWS
     #
     # @attr_reader [String] ssl_ca_path (nil)
     #   The path the a CA cert directory.
+    #
+    # @attr_reader [String] ssl_cert_store (nil)
     #
     # @attr_reader [Boolean] ssl_verify_peer (true) When `true`
     #   the HTTP handler validate server certificates for HTTPS requests.
@@ -461,6 +445,7 @@ module AWS
             :ssl_verify_peer?,
             :ssl_ca_file,
             :ssl_ca_path,
+            :ssl_cert_store,
             :use_ssl?,
             :user_agent_prefix,
           ]
@@ -528,6 +513,8 @@ module AWS
 
       add_option :ssl_ca_path
 
+      add_option :ssl_cert_store
+
       add_option :stub_requests, false, :boolean => true
 
       add_option :use_ssl, true, :boolean => true
@@ -535,7 +522,7 @@ module AWS
       add_option :user_agent_prefix
 
       add_option :verify_response_body_content_length, true, :boolean => true
-      
+
     end
   end
 end

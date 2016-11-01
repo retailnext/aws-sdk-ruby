@@ -19,16 +19,18 @@ module AWS
     # Represents a multipart upload to an S3 object.  See
     # {S3Object#multipart_upload} for a convenient way to initiate a
     # multipart upload.
-    # 
-    # Note: After you initiate multipart upload and upload one or more 
-    # parts, you must either complete or abort multipart upload in order 
-    # to stop getting charged for storage of the uploaded parts. Only 
-    # after you either complete or abort multipart upload, Amazon S3 
-    # frees up the parts storage and stops charging you for the parts 
+    #
+    # Note: After you initiate multipart upload and upload one or more
+    # parts, you must either complete or abort multipart upload in order
+    # to stop getting charged for storage of the uploaded parts. Only
+    # after you either complete or abort multipart upload, Amazon S3
+    # frees up the parts storage and stops charging you for the parts
     # storage.
     class MultipartUpload
 
       include Core::Model
+
+      class EmptyUploadError < StandardError; end
 
       # @api private
       def initialize(object, id, options = {})
@@ -205,10 +207,10 @@ module AWS
         @completed_mutex.synchronize do
           @completed_parts[part_number] = {
             :part_number => part_number,
-            :etag => resp.etag
+            :etag => resp[:etag]
           }
         end
-        UploadedPart.new(self, part_number)
+        UploadedPart.new(self, part_number, :etag => resp[:etag])
       end
 
       # Copies a part.
@@ -238,7 +240,7 @@ module AWS
             :etag => resp[:etag]
           }
         end
-        UploadedPart.new(self, part_number)
+        UploadedPart.new(self, part_number, :etag => resp[:etag])
       end
 
       # Completes the upload by assembling previously uploaded
@@ -273,7 +275,7 @@ module AWS
           complete_opts = get_complete_opts(part_numbers)
         end
 
-        raise "no parts uploaded" if complete_opts[:parts].empty?
+        raise EmptyUploadError.new("Unable to complete an empty upload.") if complete_opts[:parts].empty?
 
         resp = client.complete_multipart_upload(complete_opts)
         if resp.data[:version_id]

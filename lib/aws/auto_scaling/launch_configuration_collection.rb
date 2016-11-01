@@ -51,9 +51,11 @@ module AWS
       #   launch the instances with.
       #
       # @option options [Array<EC2::SecurityGroup>,Array<String>] :security_groups
-      #   The list of security groups to associate with the instances.
-      #   This may be an array of {EC2::SecurityGroup} objects, security
-      #   group names or security group ids.
+      #   A list of security groups to associate with the instances.
+      #   For both EC2 Classic and VPC, this option can be an array of {EC2::SecurityGroup} objects
+      #   or security group ids. For EC2 Classic, this option can also be an array of
+      #   security group names.
+      #   Note: The VPC is derived from the security groups.
       #
       # @option options [String] :user_data The user data available to
       #   the launched Amazon EC2 instances.
@@ -67,6 +69,17 @@ module AWS
       #   Amazon Virtual Private Cloud (Amazon VPC). Specifies whether
       #   to assign a public IP address to each instance launched in a Amazon VPC.
       #
+      # @option options [String] :placement_tenancy
+      #
+      # @option options [String] :classic_link_vpc_id
+      #   The ID of a ClassicLink-enabled VPC to link EC2 Classic instances to.
+      #
+      # @option options [Array<EC2::SecurityGroup>,Array<String>] :classic_link_vpc_security_groups
+      #   The list of security groups for the specified VPC to associate
+      #   with the instances. This may be an array of {EC2::SecurityGroup}
+      #   objects or security group ids. VPC security groups cannot be
+      #   referenced by name.
+      #
       # @return [LaunchConfiguration]
       #
       def create name, image, instance_type, options = {}
@@ -78,17 +91,21 @@ module AWS
         client_opts[:instance_monitoring] = instance_monitoring_opt(options) if
           options.key?(:detailed_instance_monitoring)
         client_opts[:key_name] = key_name_opt(options) if options[:key_pair]
-        client_opts[:security_groups] = security_groups_opt(options) if
+        client_opts[:security_groups] = security_groups_opt(options[:security_groups]) if
           options.key?(:security_groups)
+        client_opts[:classic_link_vpc_security_groups] = security_groups_opt(options[:classic_link_vpc_security_groups]) if
+          options.key?(:classic_link_vpc_security_groups)
         client_opts[:user_data] = user_data_opt(options) if options[:user_data]
 
         [
+          :classic_link_vpc_id,
           :iam_instance_profile,
           :spot_price,
           :kernel_id,
           :ramdisk_id,
           :block_device_mappings,
-          :associate_public_ip_address
+          :associate_public_ip_address,
+          :placement_tenancy,
         ].each do |opt|
           client_opts[opt] = options[opt] if options.key?(opt)
         end
@@ -145,8 +162,8 @@ module AWS
         key_pair.is_a?(EC2::KeyPair) ? key_pair.name : key_pair
       end
 
-      def security_groups_opt options
-        options[:security_groups].collect do |sg|
+      def security_groups_opt security_groups
+        security_groups.collect do |sg|
           sg.is_a?(EC2::SecurityGroup) ? sg.id : sg
         end
       end

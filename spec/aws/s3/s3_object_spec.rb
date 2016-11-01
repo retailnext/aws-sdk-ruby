@@ -47,6 +47,20 @@ module AWS
         object.bucket.should == bucket
       end
 
+      context '#copy_from' do
+
+        it 'accepts an S3Object and forms the correct path' do
+          client.should_receive(:copy_object).with(hash_including(
+            :bucket_name => bucket.name,
+            :key => 'target',
+            :copy_source => '/source-bucket/source-key'
+          ))
+          source = S3Object.new(Bucket.new('source-bucket'), 'source-key')
+          S3Object.new(bucket, 'target').copy_from(source)
+        end
+
+      end
+
       context '#inspect' do
 
         it 'should include the object bucket and key' do
@@ -99,7 +113,7 @@ module AWS
         end
 
         it 'should return true if the request is successful' do
-          object.exists?.should be_true
+          object.exists?.should be_truthy
         end
 
         it 'should return false if a NoSuchKey error is raised' do
@@ -108,7 +122,7 @@ module AWS
                                             double("resp",
                                                    :status => 404,
                                                    :body => '')))
-          object.exists?.should be_false
+          object.exists?.should be_falsey
         end
 
         it 'should not intercept other kinds of errors' do
@@ -751,6 +765,13 @@ module AWS
           client.stub(:head_object).and_return(head)
           object.etag.should eq('myetag')
         end
+
+        it 'returns memoized #etag without requesting data' do
+          object.config.stub(:s3_cache_object_attributes => true)
+          object = S3Object.new(bucket, 'foo', :etag => 'memoized-etag')
+          client.should_not_receive(:head)
+          object.etag.should eq('memoized-etag')
+        end
       end
 
       context '#last_modified' do
@@ -760,12 +781,27 @@ module AWS
           client.stub(:head_object).and_return(head)
           object.last_modified.should eq(now)
         end
+
+        it 'returns memoized #last_modified without requesting data' do
+          object.config.stub(:s3_cache_object_attributes => true)
+          now = Time.now
+          object = S3Object.new(bucket, 'foo', :last_modified => now)
+          client.should_not_receive(:head)
+          object.last_modified.should eq(now)
+        end
       end
 
       context '#content_length' do
         it 'returns #content_length from the head response' do
           head = { :content_length => 123 }
           client.stub(:head_object).and_return(head)
+          object.content_length.should eq(123)
+        end
+
+        it 'returns memoized #content_length without requesting data' do
+          object.config.stub(:s3_cache_object_attributes => true)
+          object = S3Object.new(bucket, 'foo', :content_length => 123)
+          client.should_not_receive(:head)
           object.content_length.should eq(123)
         end
       end
@@ -790,12 +826,12 @@ module AWS
 
         it 'should return true if server_side_encryption is not nil' do
           object.stub(:server_side_encryption => 'foo')
-          object.server_side_encryption?.should be_true
+          object.server_side_encryption?.should be_truthy
         end
 
         it 'should return false if server_side_encryption is nil' do
           object.stub(:server_side_encryption => nil)
-          object.server_side_encryption?.should be_false
+          object.server_side_encryption?.should be_falsey
         end
 
       end
@@ -976,7 +1012,8 @@ module AWS
         end
 
         it 'should add a parameter for the expiration timestamp' do
-          Time.stub(:now).and_return(Time.parse("2011-05-23 17:39:04 -0700"))
+          now = Time.parse("2011-05-23 17:39:04 -0700")
+          Time.stub(:now).and_return(now)
           object.url_for(:get).query.split("&").
             should include("Expires=1306201144")
         end
@@ -1001,7 +1038,8 @@ module AWS
         end
 
         it 'should accept an integer offset for :expires' do
-          Time.stub(:now).and_return(Time.parse("2011-05-23 18:39:00 -0700"))
+          now = Time.parse("2011-05-23 18:39:00 -0700")
+          Time.stub(:now).and_return(now)
           object.url_for(:get, :expires => 4).
             query.split("&").should include("Expires=1306201144")
         end
@@ -1132,7 +1170,7 @@ module AWS
           client.should_receive(:copy_object).
             with(:bucket_name => "foobucket",
                  :key => "foo",
-                 :copy_source => "foobucket/foo",
+                 :copy_source => "/foobucket/foo",
                  :metadata_directive => "COPY",
                  :storage_class => sc)
         end

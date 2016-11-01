@@ -16,6 +16,7 @@ require 'net/http'
 require 'timeout'
 require 'thread'
 require 'time'
+require 'json'
 
 module AWS
   module Core
@@ -51,8 +52,8 @@ module AWS
               @cached_credentials ||= get_credentials
             end
           end
-          @cached_credentials[:access_key_id] &&
-            @cached_credentials[:secret_access_key]
+          !!(@cached_credentials[:access_key_id] &&
+            @cached_credentials[:secret_access_key])
         end
 
         # @return [String] Returns the AWS access key id.
@@ -118,6 +119,12 @@ module AWS
           @providers << ENVProvider.new('AWS')
           @providers << ENVProvider.new('AWS', :access_key_id => 'ACCESS_KEY', :secret_access_key => 'SECRET_KEY', :session_token => 'SESSION_TOKEN')
           @providers << ENVProvider.new('AMAZON')
+          begin
+            if Dir.home
+              @providers << SharedCredentialFileProvider.new
+            end
+          rescue ArgumentError, NoMethodError
+          end
           @providers << EC2Provider.new
         end
 
@@ -236,7 +243,7 @@ module AWS
 
         attr_reader :credential_file
 
-        # @param [Sring] credential_file The file path of a credential file
+        # @param [String] credential_file The file path of a credential file
         def initialize(credential_file)
           @credential_file = credential_file
         end
@@ -257,6 +264,67 @@ module AWS
           end
           credentials
         end
+      end
+
+      class SharedCredentialFileProvider
+
+        include Provider
+
+        def shared_credential_file_path
+          if RUBY_VERSION < '1.9'
+            msg = "Must specify the :path to your shared credential file when using"
+            msg << " Ruby #{RUBY_VERSION}"
+            raise ArgumentError, msg
+          else
+            File.join(Dir.home, '.aws', 'credentials')
+          end
+        end
+        # @api private
+        KEY_MAP = {
+          "aws_access_key_id" => :access_key_id,
+          "aws_secret_access_key" => :secret_access_key,
+          "aws_session_token" => :session_token,
+        }
+
+        # @option [String] :path
+        # @option [String] :profile_name
+        def initialize(options = {})
+          @path = options[:path] || shared_credential_file_path
+          @profile_name = options[:profile_name]
+          @profile_name ||= ENV['AWS_PROFILE']
+          @profile_name ||= 'default'
+        end
+
+        # @return [String]
+        attr_reader :path
+
+        # @return [String]
+        attr_reader :profile_name
+
+        # (see Provider#get_credentials)
+        def get_credentials
+          if File.exist?(path) && File.readable?(path)
+            load_from_path
+          else
+            {}
+          end
+        end
+
+        private
+
+        def load_from_path
+          profile = load_profile
+          KEY_MAP.inject({}) do |credentials, (source, target)|
+            credentials[target] = profile[source] if profile.key?(source)
+            credentials
+          end
+        end
+
+        def load_profile
+          ini = IniParser.parse(File.read(path))
+          ini[profile_name] || {}
+        end
+
       end
 
       # This credential provider tries to get credentials from the EC2
@@ -286,6 +354,8 @@ module AWS
         # @param [Hash] options
         # @option options [String] :ip_address ('169.254.169.254')
         # @option options [Integer] :port (80)
+        # @option options [Integer] :retries (0) Number of times to
+        #   retry retrieving credentials.
         # @option options [Float] :http_open_timeout (1)
         # @option options [Float] :http_read_timeout (1)
         # @option options [Object] :http_debug_output (nil) HTTP wire
@@ -294,6 +364,7 @@ module AWS
         def initialize options = {}
           @ip_address = options[:ip_address] || '169.254.169.254'
           @port = options[:port] || 80
+          @retries = options[:retries] || 0
           @http_open_timeout = options[:http_open_timeout] || 1
           @http_read_timeout = options[:http_read_timeout] || 1
           @http_debug_output = options[:http_debug_output]
@@ -304,6 +375,9 @@ module AWS
 
         # @return [Integer] Defaults to port 80.
         attr_accessor :port
+
+        # @return [Integer] Defaults to 0
+        attr_accessor :retries
 
         # @return [Float]
         attr_accessor :http_open_timeout
@@ -317,7 +391,7 @@ module AWS
         # @return [Time,nil]
         attr_accessor :credentials_expiration
 
-        # Refresh provider if existing credentials will be expired in 5 min
+        # Refresh provider if existing credentials will be expired in 15 min
         # @return [Hash] Returns a hash of credentials containg at least
         #   the `:access_key_id` and `:secret_access_key`.  The hash may
         #   also contain a `:session_token`.
@@ -326,19 +400,29 @@ module AWS
         #   `:access_key_id` or the `:secret_access_key` can not be found.
         #
         def credentials
-          if @credentials_expiration && @credentials_expiration.utc <= (Time.now.utc + (15 * 60))
-            refresh
-          end
+          refresh if near_expiration?
           super
         end
 
         protected
 
+        def near_expiration?
+          if @credentials_expiration.nil?
+            true
+          elsif @credentials_expiration.utc <= (Time.now.utc + (15 * 60))
+            true
+          else
+            false
+          end
+        end
+
         # (see Provider#get_credentials)
         def get_credentials
+          retries_left = retries
+
           begin
 
-            http = Net::HTTP.new(ip_address, port)
+            http = Net::HTTP.new(ip_address, port, nil)
             http.open_timeout = http_open_timeout
             http.read_timeout = http_read_timeout
             http.set_debug_output(http_debug_output) if
@@ -364,7 +448,15 @@ module AWS
             credentials
 
           rescue *FAILURES => e
-            {}
+            if retries_left > 0
+              sleep_time = 2 ** (retries - retries_left)
+              Kernel.sleep(sleep_time)
+
+              retries_left -= 1
+              retry
+            else
+              {}
+            end
           end
         end
 
@@ -474,6 +566,57 @@ module AWS
             local_session = @session
           end
           local_session
+        end
+
+      end
+
+      # An auto-refreshing credential provider that works by assuming
+      # a role via {AWS::STS#assume_role}.
+      #
+      #    provider = AWS::Core::CredentialProviders::AssumeRoleProvider.new(
+      #      sts: AWS::STS.new(access_key_id:'AKID', secret_access_key:'SECRET'),
+      #      # assume role options:
+      #      role_arn: "linked::account::arn",
+      #      role_session_name: "session-name"
+      #    )
+      #
+      #    ec2 = AWS::EC2.new(credential_provider:provider)
+      #
+      # If you omit the `:sts` option, a new {STS} service object will be
+      # constructed and it will use the default credential provider
+      # from {Aws.config}.
+      #
+      class AssumeRoleProvider
+
+        include Provider
+
+        # @option options [AWS::STS] :sts (STS.new) An instance of {AWS::STS}.
+        #   This is used to make the API call to assume role.
+        # @option options [required, String] :role_arn
+        # @option options [required, String] :role_session_name
+        # @option options [String] :policy
+        # @option options [Integer] :duration_seconds
+        # @option options [String] :external_id
+        def initialize(options = {})
+          @options = options.dup
+          @sts = @options.delete(:sts) || STS.new
+        end
+
+        def credentials
+          refresh if near_expiration?
+          super
+        end
+
+        private
+
+        def near_expiration?
+          @expiration && @expiration.utc <= Time.now.utc + 5 * 60
+        end
+
+        def get_credentials
+          role = @sts.assume_role(@options)
+          @expiration = role[:credentials][:expiration]
+          role[:credentials]
         end
 
       end

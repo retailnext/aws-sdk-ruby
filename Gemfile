@@ -13,16 +13,17 @@
 
 source 'https://rubygems.org'
 
-gemspec
+gemspec :name => 'aws-sdk-v1'
 
-gem 'nokogiri', '< 1.6' if RUBY_VERSION < '1.9'
+gem 'rake'
+gem 'nokogiri', '< 1.6'
 
 group :repl do
   gem 'pry'
 end
 
 group :documentation do
-  gem 'yard', '>= 0.8.7', '< 1.0'
+  gem 'yard', :git => 'https://github.com/trevorrowe/yard.git', :branch => 'frameless'
   gem 'rdiscount', :github => 'lsegal/rdiscount', :branch => 'gfm-fenced-code'
   gem 'yard-sitemap', '~> 1.0'
   gem 'rdoc', '= 3.9.4'
@@ -30,11 +31,15 @@ end
 
 group :test do
   gem 'rspec', '~> 2.12'
-  gem 'cucumber'
+  gem 'cucumber', '< 2.0'
   gem 'simplecov', :require => false
-  gem 'rvm-tester'
   gem 'net-ssh', '~> 2.1'
   gem 'multipart-post'
   gem 'rotp', '~> 1.3.0'
 end
 
+if RUBY_VERSION >= '1.9.2'
+  group :release do
+    gem 'octokit'
+  end
+end

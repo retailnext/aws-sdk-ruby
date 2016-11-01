@@ -149,7 +149,7 @@ module AWS
                 $stderr = real_stderr
               end
             end
-            
+
           end
 
           context 'with incorrect arguments' do
@@ -252,15 +252,15 @@ module AWS
 
             it 'should pass along the matdesc' do
 
-              client.config.stub(:s3_encryption_matdesc).
+              object.config.stub(:s3_encryption_matdesc).
                 and_return('{"configured":"matdesc"}')
 
-              client.should_receive(:put_object).with(
+              object.client.should_receive(:put_object).with(
                 hash_including(:metadata => hash_including(
                     'x-amz-matdesc' => '{"configured":"matdesc"}'
                   )
                 )
-              ).and_return(client.stub_for(:put_object))
+              ).and_return(object.client.stub_for(:put_object))
 
               opts = { :encryption_key => "12345678901234567890123456789012" }
               object.write("HELLO", opts)
@@ -707,12 +707,12 @@ module AWS
           client.should_receive(:copy_object).with(
             hash_including(:bucket_name => "foobucket",
                            :key => "foo2.instruction",
-                           :copy_source => "foobucket/foo.instruction",
+                           :copy_source => "/foobucket/foo.instruction",
                            :metadata_directive => "COPY"))
           client.should_receive(:copy_object).with(
             hash_including(:bucket_name => "foobucket",
                            :key => "foo2",
-                           :copy_source => "foobucket/foo",
+                           :copy_source => "/foobucket/foo",
                            :metadata_directive => "COPY"))
           object.copy_to("foo2", :client_side_encrypted => true)
         end
@@ -721,7 +721,7 @@ module AWS
           client.should_receive(:copy_object).with(
             hash_including(:bucket_name => "foobucket",
                            :key => "foo2",
-                           :copy_source => "foobucket/foo",
+                           :copy_source => "/foobucket/foo",
                            :metadata_directive => "COPY"))
           object.copy_to("foo2", :client_side_encrypted => true)
         end
@@ -730,7 +730,7 @@ module AWS
           client.should_receive(:copy_object).with(
             hash_including(:bucket_name => "foobucket",
                            :key => "foo2",
-                           :copy_source => "foobucket/foo",
+                           :copy_source => "/foobucket/foo",
                            :metadata_directive => "REPLACE",
                            :metadata => {
                              'foo' => 'bar',

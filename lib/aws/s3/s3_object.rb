@@ -72,7 +72,7 @@ module AWS
     #
     # ## Streaming Uploads
     #
-    # When you call {#write} with an IO-like object, it will be streamed 
+    # When you call {#write} with an IO-like object, it will be streamed
     # to S3 in chunks.
     #
     # While it is possible to determine the size of many IO objects, you may
@@ -242,6 +242,9 @@ module AWS
       # @param [Bucket] bucket The bucket this object belongs to.
       # @param [String] key The object's key.
       def initialize(bucket, key, opts = {})
+        @content_length = opts.delete(:content_length)
+        @etag = opts.delete(:etag)
+        @last_modified = opts.delete(:last_modified)
         super
         @key = key
         @bucket = bucket
@@ -302,19 +305,19 @@ module AWS
       #
       # @return [String] Returns the object's ETag
       def etag
-        head[:etag]
+        @etag = config.s3_cache_object_attributes && @etag || head[:etag]
       end
 
       # Returns the object's last modified time.
       #
       # @return [Time] Returns the object's last modified time.
       def last_modified
-        head[:last_modified]
+        @last_modified = config.s3_cache_object_attributes && @last_modified || head[:last_modified]
       end
 
       # @return [Integer] Size of the object in bytes.
       def content_length
-        head[:content_length]
+        @content_length = config.s3_cache_object_attributes && @content_length || head[:content_length]
       end
 
       # @note S3 does not compute content-type.  It reports the content-type
@@ -418,11 +421,10 @@ module AWS
       # @since 1.7.2
       def restore options = {}
         options[:days] ||= 1
-
-        client.restore_object(
+        client.restore_object(options.merge({
           :bucket_name => bucket.name,
-          :key => key, :days => options[:days])
-
+          :key => key,
+        }))
         true
       end
 
@@ -589,6 +591,8 @@ module AWS
       #   @option options [String] :expires The date and time at which the
       #     object is no longer cacheable.
       #
+      #   @option options [String] :website_redirect_location
+      #
       # @return [S3Object, ObjectVersion] If the bucket has versioning
       #   enabled, this methods returns an {ObjectVersion}, otherwise
       #   this method returns `self`.
@@ -615,11 +619,11 @@ module AWS
       # part upload is handled.  Otherwise, {#write} is much simpler
       # to use.
       #
-      # Note: After you initiate multipart upload and upload one or 
-      # more parts, you must either complete or abort multipart 
-      # upload in order to stop getting charged for storage of the 
-      # uploaded parts. Only after you either complete or abort 
-      # multipart upload, Amazon S3 frees up the parts storage and 
+      # Note: After you initiate multipart upload and upload one or
+      # more parts, you must either complete or abort multipart
+      # upload in order to stop getting charged for storage of the
+      # uploaded parts. Only after you either complete or abort
+      # multipart upload, Amazon S3 frees up the parts storage and
       # stops charging you for the parts storage.
       #
       # @example Uploading an object in two parts
@@ -800,9 +804,9 @@ module AWS
       #
       # @param [Hash] options
       #
-      # @option options [String] :bucket_name The name of the bucket
-      #   the source object can be found in.  Defaults to the current
-      #   object's bucket.
+      # @option options [String] :bucket_name The slash-prefixed name of
+      #   the bucket the source object can be found in.  Defaults to the
+      #   current object's bucket.
       #
       # @option options [Bucket] :bucket The bucket the source object
       #   can be found in.  Defaults to the current object's bucket.
@@ -868,17 +872,20 @@ module AWS
         options[:copy_source] =
           case source
           when S3Object
-            "#{source.bucket.name}/#{source.key}"
+            "/#{source.bucket.name}/#{source.key}"
           when ObjectVersion
             options[:version_id] = source.version_id
-            "#{source.object.bucket.name}/#{source.object.key}"
+            "/#{source.object.bucket.name}/#{source.object.key}"
           else
             if options[:bucket]
-              "#{options.delete(:bucket).name}/#{source}"
+              "/#{options.delete(:bucket).name}/#{source}"
             elsif options[:bucket_name]
+              # oops, this should be slash-prefixed, but unable to change
+              # this without breaking users that already work-around this
+              # bug by sending :bucket_name => "/bucket-name"
               "#{options.delete(:bucket_name)}/#{source}"
             else
-              "#{self.bucket.name}/#{source}"
+              "/#{self.bucket.name}/#{source}"
             end
           end
 
@@ -931,9 +938,9 @@ module AWS
       #
       # @param [Hash] options
       #
-      # @option options [String] :bucket_name The name of the bucket
-      #   the object should be copied into.  Defaults to the current object's
-      #   bucket.
+      # @option options [String] :bucket_name The slash-prefixed name of the
+      #   bucket the object should be copied into.  Defaults to the current
+      #   object's bucket.
       #
       # @option options [Bucket] :bucket The bucket the target object
       #   should be copied into. Defaults to the current object's bucket.
@@ -1194,11 +1201,11 @@ module AWS
       #   secure (HTTPS) URL or a plain HTTP url.
       #
       # @option options [String] :content_type Object content type for
-      #   HTTP PUT. When provided, has to be also added to the request 
+      #   HTTP PUT. When provided, has to be also added to the request
       #   header as a 'content-type' field
       #
       # @option options [String] :content_md5 Object MD5 hash for HTTP PUT.
-      #   When provided, has to be also added to the request header as a 
+      #   When provided, has to be also added to the request header as a
       #   'content-md5' field
       #
       # @option options [String] :endpoint Sets the hostname of the
@@ -1345,10 +1352,10 @@ module AWS
 
         multipart_upload(options) do |upload|
           pos = 0
-          # We copy in part_size chunks until we read the 
+          # We copy in part_size chunks until we read the
           until pos >= source_length
             last_byte = (pos + part_size >= source_length) ? source_length - 1 : pos + part_size - 1
-            upload.copy_part(options[:copy_source], options.merge({:copy_source_range => "bytes=#{pos}-#{last_byte}"})) 
+            upload.copy_part(options[:copy_source], options.merge({:copy_source_range => "bytes=#{pos}-#{last_byte}"}))
             pos += part_size
           end
         end
@@ -1478,9 +1485,15 @@ module AWS
 
         req = Request.new
 
-        req.bucket = bucket.name
         req.key = key
         req.host = options.fetch(:endpoint, config.s3_endpoint)
+
+        if req.host.nil? && options.include?(:endpoint) && options[:endpoint].nil?
+          req.host = bucket.name
+        else
+          req.bucket = bucket.name
+        end
+
         req.port = options.fetch(:port, port)
         req.force_path_style = options.fetch(:force_path_style, config.s3_force_path_style)
 

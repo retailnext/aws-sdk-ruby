@@ -1,4 +1,4 @@
-# Copyright 2011-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Copyright 2011-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You
 # may not use this file except in compliance with the License. A copy of
@@ -168,6 +168,7 @@ module AWS
     autoload :Endpoints, "#{SRC}/core/endpoints"
     autoload :IndifferentHash, "#{SRC}/core/indifferent_hash"
     autoload :Inflection, "#{SRC}/core/inflection"
+    autoload :IniParser, "#{SRC}/core/ini_parser"
     autoload :JSONParser, "#{SRC}/core/json_parser"
 
     autoload :JSONClient, "#{SRC}/core/json_client"
@@ -306,25 +307,6 @@ module AWS
     # @option options [Boolean] :dynamo_db_retry_throughput_errors (true) When
     #   true, AWS::DynamoDB::Errors::ProvisionedThroughputExceededException
     #   errors will be retried.
-    #
-    # @option options [Float] :http_continue_timeout (1) The number of
-    #   seconds to wait for a "100-continue" response before sending the request
-    #   payload.  **This option has no effect unless the `:http_continue_threshold`
-    #   is configured to a positive integer and the payload exeedes the
-    #   threshold.** NOTE: currently there is a bug in Net::HTTP.
-    #   You must call `AWS.patch_net_http_100_continue!` for this feature to work.
-    #   Not supported in Ruby < 1.9.
-    #
-    # @option options [Integer,false] :http_continue_threshold (false) If a request
-    #   body exceedes the `:http_continue_threshold` size (in bytes), then
-    #   an "Expect" header will be added to the request with the value of
-    #   "100-continue".  This will cause the SDK to wait up to
-    #   `:http_continue_timeout` seconds for a 100 Contiue HTTP response
-    #   before sending the request payload.  By default, this feature
-    #   is disbled.  Set this option to a positive number of bytes
-    #   to enable 100 continues.  NOTE: currently there is a bug in Net::HTTP.
-    #   You must call `AWS.patch_net_http_100_continue!` for this feature to work.
-    #   Not supported in Ruby < 1.9.
     #
     # @option options [Object] :http_handler (AWS::Core::Http::NetHttpHandler)
     #   The http handler that sends requests to AWS.
@@ -661,11 +643,9 @@ module AWS
       visited
     end
 
-    # Patches Net::HTTP, fixing a bug in how it handles non 100-continue
-    # responses while waiting for a 100-continue.
+    # Now deprecated, as the SDK will always patch Net::HTTP when loaded.
+    # @api private
     def patch_net_http_100_continue!
-      require 'aws/core/http/patch'
-      AWS::Core::Http.patch_net_http_100_continue!
       nil
     end
 
@@ -677,7 +657,7 @@ module AWS
         versions = {}
         pattern = File.join(File.dirname(__FILE__), 'api_config', '*.yml')
         Dir.glob(pattern).each do |path|
-          matches = path.match(/(\w+)-(\d{4}-\d{2}-\d{2})/)
+          path.match(/(\w+)-(\d{4}-\d{2}-\d{2})/)
           svc = SERVICES[$1].full_name
           versions[svc] ||= []
           versions[svc] << $2
@@ -713,3 +693,6 @@ unless SecureRandom.respond_to?(:uuid)
     end
   end
 end
+
+require 'aws/core/http/patch'
+AWS::Core::Http::Patches.apply!

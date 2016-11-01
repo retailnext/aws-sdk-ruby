@@ -16,6 +16,8 @@ require 'json'
 require 'net/http'
 require 'net/https'
 require 'openssl'
+require 'uri'
+
 Dir.glob("#{File.dirname __FILE__}/originators/*.rb").each { |rb| require rb }
 
 module AWS
@@ -25,14 +27,14 @@ module AWS
 
     # Represents a single SNS message.
     #
-    # See also http://docs.amazonwebservices.com/sns/latest/gsg/json-formats.html
+    # See also http://docs.aws.amazon.com/sns/latest/gsg/json-formats.html
     #
     # = Originators
     # Originators are sources of SNS messages.  {FromAutoScaling} is one.  {Message}
     # can be extended by originators if their #applicable? method returns true when
     # passed the raw message.
     # Originator modules must implement `applicable? sns` module function.
-    # If an originator is applicable, it should set the `@origin` accessor to denote 
+    # If an originator is applicable, it should set the `@origin` accessor to denote
     # itself.
     class Message
       SIGNABLE_KEYS = [
@@ -71,7 +73,7 @@ module AWS
       #   correctly cryptographically signed by sender
       #   nothing went wrong during authenticating the {Message}
       #
-      # See http://docs.amazonwebservices.com/sns/latest/gsg/SendMessageToHttp.verify.signature.html
+      # See http://docs.aws.amazon.com/sns/latest/gsg/SendMessageToHttp.verify.signature.html
       def authentic?
         begin
           decoded_from_base64 = decode signature
@@ -166,7 +168,15 @@ module AWS
       end
 
       def download url
-        raise MessageWasNotAuthenticError, "cert is not hosted at AWS URL (https): #{url}" unless url =~ /^https.*amazonaws\.com\/.*$/i
+        uri = URI.parse(url)
+        unless
+          uri.scheme == 'https' &&
+          uri.host.match(/^sns\.[a-zA-Z0-9\-]{3,}\.amazonaws\.com(\.cn)?$/) &&
+          File.extname(uri.path) == '.pem'
+        then
+          msg = "cert is not hosted at AWS URL (https): #{url}"
+          raise MessageWasNotAuthenticError, msg
+        end
         tries = 0
         begin
           resp = https_get(url)

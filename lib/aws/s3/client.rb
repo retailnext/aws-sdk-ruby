@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2011-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You
@@ -18,6 +19,7 @@ require 'json'
 require 'digest/md5'
 require 'base64'
 require 'nokogiri'
+require 'set'
 
 module AWS
   class S3
@@ -25,11 +27,23 @@ module AWS
     # Client class for Amazon Simple Storage Service (S3).
     class Client < Core::Client
 
+      include RegionDetection
+
+      def initialize(options = {})
+        super(options.merge(:http_continue_threshold => 0))
+      end
+
       signature_version :S3
 
       API_VERSION = '2006-03-01'
 
       XMLNS = "http://s3.amazonaws.com/doc/#{API_VERSION}/"
+
+      HTTP_200_ERROR_OPERATIONS = Set.new([
+        :complete_multipart_upload,
+        :copy_object,
+        :copy_part,
+      ])
 
       autoload :XML, 'aws/s3/client/xml'
 
@@ -50,14 +64,11 @@ module AWS
       # @param [Core::Http::Request] request
       # @api private
       def sign_request request
-        version = @config.s3_signature_version ?
-          @config.s3_signature_version.to_sym :
-          (@region =~ /cn-/ ? :v4 : :v3)
-        case version
+        case @config.s3_signature_version.to_sym
         when :v4 then v4_signer.sign_request(request)
         when :v3 then v3_signer.sign_request(request)
         else
-          raise "invalid signature version #{version.inspect}"
+          raise "invalid signature version #{@config.s3_signature_version.inspect}"
         end
       end
 
@@ -164,8 +175,10 @@ module AWS
 
       def extract_error_details response
         if
-          (response.http_response.status >= 300 ||
-            response.request_type == :complete_multipart_upload) and
+          (
+            response.http_response.status >= 300 ||
+            HTTP_200_ERROR_OPERATIONS.include?(response.request_type)
+          ) and
           body = response.http_response.body and
           error = Core::XML::Parser.parse(body) and
           error[:code]
@@ -192,16 +205,22 @@ module AWS
       end
 
       def retryable_error? response
-        super or
-        failed_multipart_upload?(response) or
+        super ||
+        http_200_error?(response) ||
         response.error.is_a?(Errors::RequestTimeout)
       end
 
-      # S3 may return a 200 response code in response to complete_multipart_upload
-      # and then start streaming whitespace until it knows the final result.
-      # At that time it sends an XML message with success or failure.
-      def failed_multipart_upload? response
-        response.request_type == :complete_multipart_upload &&
+      # S3 may return with a 200 status code in the response, but still
+      # embed an error in the body for the following operations:
+      #
+      # * `#complete_multipart_upload`
+      # * `#copy_object`
+      # * `#copy_part`
+      #
+      # To ensure the response is not in error, we have to parse
+      # it before the normal parser.
+      def http_200_error? response
+        HTTP_200_ERROR_OPERATIONS.include?(response.request_type) &&
         extract_error_details(response)
       end
 
@@ -236,7 +255,7 @@ module AWS
       end
 
       def md5 str
-        Base64.encode64(Digest::MD5.digest(str)).strip
+        Base64.encode64(OpenSSL::Digest::MD5.digest(str)).strip
       end
 
       def parse_copy_part_response resp
@@ -291,6 +310,8 @@ module AWS
           'etag' => :etag,
           'x-amz-website-redirect-location' => :website_redirect_location,
           'accept-ranges' => :accept_ranges,
+          'x-amz-server-side-encryption-customer-algorithm' => :sse_customer_algorithm,
+          'x-amz-server-side-encryption-customer-key-MD5' => :sse_customer_key_md5
         }.each_pair do |header,method|
           if value = resp.http_response.header(header)
             resp.data[method] = value
@@ -1015,7 +1036,7 @@ module AWS
       #     * `:permission` - (String) Logging permissions given to the Grantee
       #          for the bucket. The bucket owner is automatically granted FULL_CONTROL
       #          to all logs delivered to the bucket. This optional element enables
-      #          you grant access to others. Valid Values: FULL_CONTROL | READ | WRITE 
+      #          you grant access to others. Valid Values: FULL_CONTROL | READ | WRITE
       #   @return [Core::Response]
       bucket_method(:put_bucket_logging, :put) do
         configure_request do |req, options|
@@ -1062,7 +1083,7 @@ module AWS
           xml = xml.doc.root.to_xml
           req.body = xml
           req.headers['content-md5'] = md5(xml)
-          
+
           super(req, options)
 
         end
@@ -1352,6 +1373,18 @@ module AWS
       #   @option options [String] :grant_read_acp
       #   @option options [String] :grant_write_acp
       #   @option options [String] :grant_full_control
+      #   @option options [String] :sse_customer_algorithm Specifies the
+      #     algorithm to use to when encrypting the object (e.g., AES256).
+      #   @option options [String] :sse_customer_key Specifies the
+      #     customer-provided encryption key for Amazon S3 to use in encrypting
+      #     data. This value is used to store the object and then it is
+      #     discarded; Amazon does not store the encryption key. The key must be
+      #     appropriate for use with the algorithm specified in the
+      #     `:sse_customer_algorithm` header.
+      #   @option options [String] :sse_customer_key_md5 Specifies the 128-bit
+      #     MD5 digest of the encryption key according to RFC 1321. Amazon S3
+      #     uses this header for a message integrity check to ensure the
+      #     encryption key was transmitted without error.
       #   @return [Core::Response]
       #
       object_method(:put_object, :put, :header_options => {
@@ -1368,6 +1401,9 @@ module AWS
         :content_encoding => 'Content-Encoding',
         :content_type => 'Content-Type',
         :expires => 'Expires',
+        :sse_customer_algorithm => 'x-amz-server-side-encryption-customer-algorithm',
+        :sse_customer_key => 'x-amz-server-side-encryption-customer-key',
+        :sse_customer_key_md5 => 'x-amz-server-side-encryption-customer-key-MD5',
       }) do
 
         configure_request do |request, options|
@@ -1399,6 +1435,9 @@ module AWS
       #   @param [Hash] options
       #   @option options [required,String] :bucket_name
       #   @option options [required,String] :key
+      #   @option options [String] :request_payer If specified, the request
+      #     will contain the specified String value in the x-amz-request-payer
+      #     header. This is required for Requester Pays enabled buckets.
       #   @option options [Time] :if_modified_since If specified, the
       #     response will contain an additional `:modified` value that
       #     returns true if the object was modified after the given
@@ -1419,15 +1458,31 @@ module AWS
       #     is true if and only if the object ETag matches the value for
       #     this option.  If `:matches` is true, the `:data` value
       #     of the response will be `nil`.
+      #   @option options [String] :sse_customer_algorithm Specifies the
+      #     algorithm to use to when encrypting the object (e.g., AES256).
+      #   @option options [String] :sse_customer_key Specifies the
+      #     customer-provided encryption key for Amazon S3 to use in encrypting
+      #     data. This value is used to store the object and then it is
+      #     discarded; Amazon does not store the encryption key. The key must be
+      #     appropriate for use with the algorithm specified in the
+      #     `:sse_customer_algorithm` header.
+      #   @option options [String] :sse_customer_key_md5 Specifies the 128-bit
+      #     MD5 digest of the encryption key according to RFC 1321. Amazon S3
+      #     uses this header for a message integrity check to ensure the
+      #     encryption key was transmitted without error.
       #   @option options [Range<Integer>] :range A byte range of data to request.
       #   @return [Core::Response]
       #
       object_method(:get_object, :get,
                     :header_options => {
+                      :request_payer => "x-amz-request-payer",
                       :if_modified_since => "If-Modified-Since",
                       :if_unmodified_since => "If-Unmodified-Since",
                       :if_match => "If-Match",
-                      :if_none_match => "If-None-Match"
+                      :if_none_match => "If-None-Match",
+                      :sse_customer_algorithm => 'x-amz-server-side-encryption-customer-algorithm',
+                      :sse_customer_key => 'x-amz-server-side-encryption-customer-key',
+                      :sse_customer_key_md5 => 'x-amz-server-side-encryption-customer-key-MD5',
                     }) do
         configure_request do |req, options|
 
@@ -1504,6 +1559,18 @@ module AWS
       #     is true if and only if the object ETag matches the value for
       #     this option.  If `:matches` is true, the `:data` value
       #     of the response will be `nil`.
+      #   @option options [String] :sse_customer_algorithm Specifies the
+      #     algorithm to use to when encrypting the object (e.g., AES256).
+      #   @option options [String] :sse_customer_key Specifies the
+      #     customer-provided encryption key for Amazon S3 to use in encrypting
+      #     data. This value is used to store the object and then it is
+      #     discarded; Amazon does not store the encryption key. The key must be
+      #     appropriate for use with the algorithm specified in the
+      #     `:sse_customer_algorithm` header.
+      #   @option options [String] :sse_customer_key_md5 Specifies the 128-bit
+      #     MD5 digest of the encryption key according to RFC 1321. Amazon S3
+      #     uses this header for a message integrity check to ensure the
+      #     encryption key was transmitted without error.
       #   @option options [Range<Integer>] :range A byte range of data to request.
       #   @return [Core::Response]
       object_method(:head_object, :head,
@@ -1511,7 +1578,10 @@ module AWS
                       :if_modified_since => "If-Modified-Since",
                       :if_unmodified_since => "If-Unmodified-Since",
                       :if_match => "If-Match",
-                      :if_none_match => "If-None-Match"
+                      :if_none_match => "If-None-Match",
+                      :sse_customer_algorithm => 'x-amz-server-side-encryption-customer-algorithm',
+                      :sse_customer_key => 'x-amz-server-side-encryption-customer-key',
+                      :sse_customer_key_md5 => 'x-amz-server-side-encryption-customer-key-MD5',
                     }) do
 
         configure_request do |req, options|
@@ -1651,6 +1721,18 @@ module AWS
       #   @option options [String] :grant_read_acp
       #   @option options [String] :grant_write_acp
       #   @option options [String] :grant_full_control
+      #   @option options [String] :sse_customer_algorithm Specifies the
+      #     algorithm to use to when encrypting the object (e.g., AES256).
+      #   @option options [String] :sse_customer_key Specifies the
+      #     customer-provided encryption key for Amazon S3 to use in encrypting
+      #     data. This value is used to store the object and then it is
+      #     discarded; Amazon does not store the encryption key. The key must be
+      #     appropriate for use with the algorithm specified in the
+      #     `:sse_customer_algorithm` header.
+      #   @option options [String] :sse_customer_key_md5 Specifies the 128-bit
+      #     MD5 digest of the encryption key according to RFC 1321. Amazon S3
+      #     uses this header for a message integrity check to ensure the
+      #     encryption key was transmitted without error.
       #   @return [Core::Response]
       object_method(:initiate_multipart_upload, :post, 'uploads',
                     XML::InitiateMultipartUpload,
@@ -1667,6 +1749,9 @@ module AWS
                       :content_encoding => 'Content-Encoding',
                       :content_type => 'Content-Type',
                       :expires => 'Expires',
+                      :sse_customer_algorithm => 'x-amz-server-side-encryption-customer-algorithm',
+                      :sse_customer_key => 'x-amz-server-side-encryption-customer-key',
+                      :sse_customer_key_md5 => 'x-amz-server-side-encryption-customer-key-MD5',
                     }) do
 
         configure_request do |req, options|
@@ -1755,7 +1840,10 @@ module AWS
       #   @return [Core::Response]
       object_method(:upload_part, :put,
                     :header_options => {
-                      :content_md5 => 'Content-MD5'
+                      :content_md5 => 'Content-MD5',
+                      :sse_customer_algorithm => 'x-amz-server-side-encryption-customer-algorithm',
+                      :sse_customer_key => 'x-amz-server-side-encryption-customer-key',
+                      :sse_customer_key_md5 => 'x-amz-server-side-encryption-customer-key-MD5',
                     }) do
         configure_request do |request, options|
 
@@ -1893,6 +1981,29 @@ module AWS
       #   @option options [String] :grant_read_acp
       #   @option options [String] :grant_write_acp
       #   @option options [String] :grant_full_control
+      #   @option options [String] :sse_customer_algorithm Specifies the
+      #     algorithm to use to when encrypting the object (e.g., AES256).
+      #   @option options [String] :sse_customer_key Specifies the
+      #     customer-provided encryption key for Amazon S3 to use in encrypting
+      #     data. This value is used to store the object and then it is
+      #     discarded; Amazon does not store the encryption key. The key must be
+      #     appropriate for use with the algorithm specified in the
+      #     `:sse_customer_algorithm` header.
+      #   @option options [String] :sse_customer_key_md5 Specifies the 128-bit
+      #     MD5 digest of the encryption key according to RFC 1321. Amazon S3
+      #     uses this header for a message integrity check to ensure the
+      #     encryption key was transmitted without error.
+      #   @option options [String] :copy_source_sse_customer_algorithm Specifies
+      #     the algorithm to use when decrypting the source object (e.g.,
+      #     AES256).
+      #   @option options [String] :copy_source_sse_customer_key Specifies the
+      #     customer-provided encryption key for Amazon S3 to use to decrypt the
+      #     source object. The encryption key provided in this header must be
+      #     one that was used when the source object was created.
+      #   @option options [String] :copy_source_sse_customer_key_md5 Specifies
+      #     the 128-bit MD5 digest of the encryption key according to RFC 1321.
+      #     Amazon S3 uses this header for a message integrity check to ensure
+      #     the encryption key was transmitted without error.
       #   @return [Core::Response]
       object_method(:copy_object, :put, :header_options => {
         :website_redirect_location => 'x-amz-website-redirect-location',
@@ -1909,6 +2020,12 @@ module AWS
         :content_encoding => 'Content-Encoding',
         :content_disposition => 'Content-Disposition',
         :expires => 'Expires',
+        :sse_customer_algorithm => 'x-amz-server-side-encryption-customer-algorithm',
+        :sse_customer_key => 'x-amz-server-side-encryption-customer-key',
+        :sse_customer_key_md5 => 'x-amz-server-side-encryption-customer-key-MD5',
+        :copy_source_sse_customer_algorithm => 'x-amz-copy-source-server-side-encryption-customer-algorithm',
+        :copy_source_sse_customer_key => 'x-amz-copy-source-server-side-encryption-customer-key',
+        :copy_source_sse_customer_key_md5 => 'x-amz-copy-source-server-side-encryption-customer-key-MD5',
       }) do
 
         configure_request do |req, options|

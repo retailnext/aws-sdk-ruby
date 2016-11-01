@@ -48,7 +48,7 @@ module AWS
 
       # Creates a new Amazon EBS volume that any Amazon EC2 instance
       # in the same Availability Zone can attach to. For more
-      # information about Amazon EBS, go to the [Amazon Elastic Compute Cloud User Guide](http://docs.amazonwebservices.com/AWSEC2/latest/UserGuide/index.html?using-ebs.html).
+      # information about Amazon EBS, go to the [Amazon Elastic Compute Cloud User Guide](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/index.html?using-ebs.html).
       #
       # @return [Volume] An object representing the new volume.
       #
@@ -75,6 +75,10 @@ module AWS
       # @option options [String] :iops
       #
       # @option options [String] :volume_type
+      #
+      # @option options [Boolean] :encrypted (false)
+      #   When true, the volume will be encrypted.
+      #   For more information, refer to [Amazon EBS Encryption](http://http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSEncryption.html)
       #
       # @return [Volume]
       #

@@ -28,6 +28,18 @@ module AWS
     #
     class HostedZone < Core::Resource
 
+      S3_HOSTED_ZONE_IDS = {
+          'us-east-1' => 'Z3AQBSTGFYJSTF',
+          'us-west-2' => 'Z3BJ6K6RIION7M',
+          'us-west-1' => 'Z2F56UZL2M1ACD',
+          'eu-west-1' => 'Z1BKCTXD74EZPE',
+          'ap-southeast-1' => 'Z3O0J2DXBE1FTB',
+          'ap-southeast-2' => 'Z1WCIGYICN2BYD',
+          'ap-northeast-1' => 'Z2M4EHUR26P7ZW',
+          'sa-east-1' => 'Z7KQH4QJS55SO',
+          'us-gov-west-1' => 'Z31GFT0UA1I2HV'
+      }
+
       # @api private
       def initialize id, options = {}
         @id = id.sub(%r!^/hostedzone/!, '')
@@ -60,6 +72,8 @@ module AWS
 
       get_attribute :delegation_set, :static => true
 
+      get_attribute :vpcs
+
       provider(:list_hosted_zones) do |provider|
         provider.find do |resp|
           resp.data[:hosted_zones].find do |detail|
@@ -73,6 +87,7 @@ module AWS
         provider.find do |resp|
           if resp[:hosted_zone][:id] == path
             resp[:hosted_zone][:delegation_set] = resp[:delegation_set]
+            resp[:hosted_zone][:vpcs] = resp[:vpcs]
             resp[:hosted_zone]
           end
         end
@@ -94,7 +109,10 @@ module AWS
 
       # @return [Boolean] Returns `true` if this hosted zone exists.
       def exists?
-        get_resource.data[:hosted_zone][:id] == path
+        get_resource
+        true
+      rescue Errors::NoSuchHostedZone
+        false
       end
 
       # Returns resource record sets.
@@ -103,6 +121,28 @@ module AWS
         ResourceRecordSetCollection.new(id, :config => config)
       end
       alias_method :rrsets, :resource_record_sets
+
+      # Associates an additional VPC with a private hosted zone.
+      # @return [ChangeInfo]
+      def associate_vpc vpc
+        resp = client.associate_vpc_with_hosted_zone(:hosted_zone_id => id, :vpc => vpc)
+        if resp[:change_info][:id]
+          ChangeInfo.new_from(:associate_vpc_with_hosted_zone,
+                              resp[:change_info],
+                              resp[:change_info][:id])
+        end
+      end
+
+      # Disassociates an VPC from an private hosted zone.
+      # @return [ChangeInfo]
+      def disassociate_vpc vpc
+        resp = client.disassociate_vpc_from_hosted_zone(:hosted_zone_id => id, :vpc => vpc)
+        if resp[:change_info][:id]
+          ChangeInfo.new_from(:disassociate_vpc_from_hosted_zone,
+                              resp[:change_info],
+                              resp[:change_info][:id])
+        end
+      end
 
       protected
 

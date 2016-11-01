@@ -105,6 +105,16 @@ module AWS
           rule.glacier_transition_time.should == 5
         end
 
+        it 'accepts days for Noncurrent Version Transition Days' do
+          rule = lifecycle.add_rule('prefix', :noncurrent_version_transition_days => 10)
+          rule.noncurrent_version_transition_days.should == 10
+        end
+
+        it 'accepts days for Noncurrent Version Expiration Days' do
+          rule = lifecycle.add_rule('prefix', :noncurrent_version_expiration_days => 30)
+          rule.noncurrent_version_expiration_days.should == 30
+        end
+        
       end
 
       context '#remove_rule' do
@@ -224,6 +234,41 @@ module AWS
           lifecycle.update do
             add_rule 'foo/bar', 10
             add_rule 'bar/foo', 11, :id => 'abc-xyz', :disabled => true
+          end
+
+        end
+
+
+       it 'can used arguments' do
+            xml = <<-XML.xml_cleanup
+<LifecycleConfiguration>
+  <Rule>
+    <ID>#{uuid}</ID>
+    <Prefix>foo/bar</Prefix>
+    <Status>Enabled</Status>
+    <Expiration>
+      <Days>10</Days>
+    </Expiration>
+  </Rule>
+  <Rule>
+    <ID>abc-xyz</ID>
+    <Prefix>bar/foo</Prefix>
+    <Status>Disabled</Status>
+    <Expiration>
+      <Days>11</Days>
+    </Expiration>
+  </Rule>
+</LifecycleConfiguration>
+            XML
+
+          client.should_receive(:set_bucket_lifecycle_configuration) do |hash|
+            hash[:bucket_name].should eq(bucket.name)
+            hash[:lifecycle_configuration].xml_cleanup.should eq(xml)
+          end
+
+          lifecycle.update(:id => 'abc-xyz') do |args|
+            add_rule 'foo/bar', 10
+            add_rule 'bar/foo', 11, :id => args[:id], :disabled => true
           end
 
         end

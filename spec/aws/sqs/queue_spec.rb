@@ -12,6 +12,7 @@
 # language governing permissions and limitations under the License.
 
 require 'spec_helper'
+require 'openssl'
 
 module AWS
   class SQS
@@ -70,7 +71,7 @@ module AWS
         before(:each) do
           resp.data[:message_id] = 'abc123'
           resp.data[:md5_of_message_body] = valid_md5
-          Digest::MD5.stub(:hexdigest).and_return(valid_md5)
+          OpenSSL::Digest::MD5.stub(:hexdigest).and_return(valid_md5)
           client.stub(:send_message).and_return(resp)
         end
 
@@ -102,6 +103,12 @@ module AWS
           expect { queue.send_message("GOODBYE") }.to raise_error(Errors::ChecksumError)
         end
 
+        it 'populates the the request id in sent message' do
+          resp.data[:response_metadata] = { :request_id => 'request-id' }
+          sent_message = queue.send_message('test')
+          sent_message.request_id.should eq('request-id')
+        end
+
       end
 
       context 'receiving messages' do
@@ -126,7 +133,7 @@ module AWS
 
         before(:each) do
           resp.data[:messages] = [response_message]
-          Digest::MD5.stub(:hexdigest).and_return(valid_md5)
+          OpenSSL::Digest::MD5.stub(:hexdigest).and_return(valid_md5)
           client.stub(:receive_message).and_return(resp)
         end
 
@@ -517,7 +524,7 @@ module AWS
                   throw :done
                 end
               end
-              got_message.should be_true
+              got_message.should be_truthy
             end
 
             it 'should override the idle timeout if larger' do
@@ -529,7 +536,7 @@ module AWS
                   throw :done
                 end
               end
-              got_message.should be_true
+              got_message.should be_truthy
             end
 
             it 'should not prevent the first message if false' do
@@ -541,7 +548,7 @@ module AWS
                   throw :done
                 end
               end
-              got_message.should be_true
+              got_message.should be_truthy
             end
 
             it 'should not apply after the first message' do
@@ -557,7 +564,7 @@ module AWS
                   end
                 end
               end
-              got_second.should be_true
+              got_second.should be_truthy
             end
 
           end
@@ -578,17 +585,17 @@ module AWS
         it 'should return false if NonExistentQueue is raised' do
           client.stub(:get_queue_attributes).
             and_raise(SQS::Errors::NonExistentQueue)
-          queue.exists?.should be_false
+          queue.exists?.should be_falsey
         end
 
         it 'should return false if InvalidAddress is raised' do
           client.stub(:get_queue_attributes).
             and_raise(SQS::Errors::InvalidAddress)
-          queue.exists?.should be_false
+          queue.exists?.should be_falsey
         end
 
         it 'should return true if no exception is raised' do
-          queue.exists?.should be_true
+          queue.exists?.should be_truthy
         end
 
         it 'should not rescue other exceptions' do
@@ -1050,7 +1057,7 @@ module AWS
           let(:valid_md5) { 'md5' }
 
           before(:each) do
-            Digest::MD5.stub(:hexdigest).and_return(valid_md5)
+            OpenSSL::Digest::MD5.stub(:hexdigest).and_return(valid_md5)
             client.stub(:send_message_batch).and_return(response)
           end
 

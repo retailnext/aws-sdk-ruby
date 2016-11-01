@@ -105,6 +105,7 @@ module AWS
       #       * `:volume_type` - (String) Valid values include:
       #         * `standard`
       #         * `io1`
+      #         * `gp2`
       #       * `:iops` - (Integer)
       #     * `:no_device` - (String) Specifies the device name to suppress
       #       during instance launch.
@@ -297,8 +298,8 @@ module AWS
         end
 
         security_group_opts(options)
-
-        options[:client_token] = SecureRandom.uuid
+        
+        options[:client_token] = SecureRandom.uuid unless options[:client_token]
 
         resp = client.run_instances(options)
 

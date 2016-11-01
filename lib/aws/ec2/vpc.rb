@@ -40,6 +40,8 @@ module AWS
 
       attribute :instance_tenancy, :static => true, :to_sym => true
 
+      attribute :is_default, :alias => :is_default?, :static => true, :boolean => true
+
       populates_from(:create_vpc) do |resp|
         resp.vpc if resp.vpc.vpc_id == vpc_id
       end
@@ -98,6 +100,18 @@ module AWS
       #   network interfaces that are in this VPC.
       def network_interfaces
         NetworkInterfaceCollection.new(:config => config).filter('vpc-id', id)
+      end
+
+      # @return [VPCPeeringConnectionCollection] Returns a filtered collection
+      #   of VPC peering connection from this VPC.
+      def peering_connections
+        VPCPeeringConnectionCollection.new(:config => config).filter('requester-vpc-info.vpc-id', vpc_id)
+      end
+
+      # @return [VPCPeeringConnectionCollection] Returns a filtered collection
+      #   of VPC peering connection to this VPC.
+      def peering_connections
+        VPCPeeringConnectionCollection.new(:config => config).filter('accepter-vpc-info.vpc-id', vpc_id)
       end
 
       # @return [InternetGateway,nil] Returns the internet gateway attached to
@@ -167,6 +181,42 @@ module AWS
           dhcp_options = DHCPOptions.new(dhcp_options, :config => config)
         end
         dhcp_options.associate(self)
+      end
+
+      # Create a VPC peering connection between this VPC and another
+      #   VPC owned by the same user, and accept it.
+      # @return [VPCPeeringConnection] Returns the VPC peering connection
+      #   that was created
+      def peer_to vpc
+        peering_connection = peering_connections.create(self, vpc)
+        peering_connection.accept
+        peering_connection
+      end
+
+      # @return [Boolean] Returns true if DNS resolution is supported for
+      #   this VPC
+      def dns_support
+        resp = client.describe_vpc_attribute(:vpc_id => vpc_id, :attribute => 'enableDnsSupport')
+        resp.enable_dns_support
+      end
+
+      # Enables DNS resolution support for this VPC
+      def dns_support= enable_dns_support
+        client.modify_vpc_attribute(:vpc_id => vpc_id, :enable_dns_support => { :value => enable_dns_support } )
+        enable_dns_support
+      end
+
+      # @return [Boolean] Returns true if instances launched in the VPC get
+      #   DNS hostnames in this VPC
+      def dns_hostnames
+        resp = client.describe_vpc_attribute(:vpc_id => vpc_id, :attribute => 'enableDnsHostnames')
+        resp.enable_dns_hostnames
+      end
+
+      # Enables DNS hostnames for this VPC
+      def dns_hostnames= enable_dns_hostnames
+        client.modify_vpc_attribute(:vpc_id => vpc_id, :enable_dns_hostnames => { :value => enable_dns_hostnames } )
+        enable_dns_hostnames
       end
 
     end

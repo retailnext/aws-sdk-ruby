@@ -1,4 +1,4 @@
-# Copyright 2011-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Copyright 2011-2015 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You
 # may not use this file except in compliance with the License. A copy of
@@ -35,9 +35,11 @@
     :pipeline_id:
       :name: PipelineId
       :type: :string
+      :required: true
     :input:
       :name: Input
       :type: :hash
+      :required: true
       :members:
         :key:
           :name: Key
@@ -57,6 +59,22 @@
         :container:
           :name: Container
           :type: :string
+        :encryption:
+          :name: Encryption
+          :type: :hash
+          :members:
+            :mode:
+              :name: Mode
+              :type: :string
+            :key:
+              :name: Key
+              :type: :string
+            :key_md_5:
+              :name: KeyMd5
+              :type: :string
+            :initialization_vector:
+              :name: InitializationVector
+              :type: :string
     :output:
       :name: Output
       :type: :hash
@@ -67,6 +85,22 @@
         :thumbnail_pattern:
           :name: ThumbnailPattern
           :type: :string
+        :thumbnail_encryption:
+          :name: ThumbnailEncryption
+          :type: :hash
+          :members:
+            :mode:
+              :name: Mode
+              :type: :string
+            :key:
+              :name: Key
+              :type: :string
+            :key_md_5:
+              :name: KeyMd5
+              :type: :string
+            :initialization_vector:
+              :name: InitializationVector
+              :type: :string
         :rotate:
           :name: Rotate
           :type: :string
@@ -89,6 +123,22 @@
               :input_key:
                 :name: InputKey
                 :type: :string
+              :encryption:
+                :name: Encryption
+                :type: :hash
+                :members:
+                  :mode:
+                    :name: Mode
+                    :type: :string
+                  :key:
+                    :name: Key
+                    :type: :string
+                  :key_md_5:
+                    :name: KeyMd5
+                    :type: :string
+                  :initialization_vector:
+                    :name: InitializationVector
+                    :type: :string
         :album_art:
           :name: AlbumArt
           :type: :hash
@@ -121,6 +171,22 @@
                   :album_art_format:
                     :name: AlbumArtFormat
                     :type: :string
+                  :encryption:
+                    :name: Encryption
+                    :type: :hash
+                    :members:
+                      :mode:
+                        :name: Mode
+                        :type: :string
+                      :key:
+                        :name: Key
+                        :type: :string
+                      :key_md_5:
+                        :name: KeyMd5
+                        :type: :string
+                      :initialization_vector:
+                        :name: InitializationVector
+                        :type: :string
         :composition:
           :name: Composition
           :type: :array
@@ -138,6 +204,93 @@
                   :duration:
                     :name: Duration
                     :type: :string
+        :captions:
+          :name: Captions
+          :type: :hash
+          :members:
+            :merge_policy:
+              :name: MergePolicy
+              :type: :string
+            :caption_sources:
+              :name: CaptionSources
+              :type: :array
+              :members:
+                :name: member
+                :type: :hash
+                :members:
+                  :key:
+                    :name: Key
+                    :type: :string
+                  :language:
+                    :name: Language
+                    :type: :string
+                  :time_offset:
+                    :name: TimeOffset
+                    :type: :string
+                  :label:
+                    :name: Label
+                    :type: :string
+                  :encryption:
+                    :name: Encryption
+                    :type: :hash
+                    :members:
+                      :mode:
+                        :name: Mode
+                        :type: :string
+                      :key:
+                        :name: Key
+                        :type: :string
+                      :key_md_5:
+                        :name: KeyMd5
+                        :type: :string
+                      :initialization_vector:
+                        :name: InitializationVector
+                        :type: :string
+            :caption_formats:
+              :name: CaptionFormats
+              :type: :array
+              :members:
+                :name: member
+                :type: :hash
+                :members:
+                  :format:
+                    :name: Format
+                    :type: :string
+                  :pattern:
+                    :name: Pattern
+                    :type: :string
+                  :encryption:
+                    :name: Encryption
+                    :type: :hash
+                    :members:
+                      :mode:
+                        :name: Mode
+                        :type: :string
+                      :key:
+                        :name: Key
+                        :type: :string
+                      :key_md_5:
+                        :name: KeyMd5
+                        :type: :string
+                      :initialization_vector:
+                        :name: InitializationVector
+                        :type: :string
+        :encryption:
+          :name: Encryption
+          :type: :hash
+          :members:
+            :mode:
+              :name: Mode
+              :type: :string
+            :key:
+              :name: Key
+              :type: :string
+            :key_md_5:
+              :name: KeyMd5
+              :type: :string
+            :initialization_vector:
+              :name: InitializationVector
+              :type: :string
     :outputs:
       :name: Outputs
       :type: :array
@@ -151,6 +304,22 @@
           :thumbnail_pattern:
             :name: ThumbnailPattern
             :type: :string
+          :thumbnail_encryption:
+            :name: ThumbnailEncryption
+            :type: :hash
+            :members:
+              :mode:
+                :name: Mode
+                :type: :string
+              :key:
+                :name: Key
+                :type: :string
+              :key_md_5:
+                :name: KeyMd5
+                :type: :string
+              :initialization_vector:
+                :name: InitializationVector
+                :type: :string
           :rotate:
             :name: Rotate
             :type: :string
@@ -173,6 +342,22 @@
                 :input_key:
                   :name: InputKey
                   :type: :string
+                :encryption:
+                  :name: Encryption
+                  :type: :hash
+                  :members:
+                    :mode:
+                      :name: Mode
+                      :type: :string
+                    :key:
+                      :name: Key
+                      :type: :string
+                    :key_md_5:
+                      :name: KeyMd5
+                      :type: :string
+                    :initialization_vector:
+                      :name: InitializationVector
+                      :type: :string
           :album_art:
             :name: AlbumArt
             :type: :hash
@@ -205,6 +390,22 @@
                     :album_art_format:
                       :name: AlbumArtFormat
                       :type: :string
+                    :encryption:
+                      :name: Encryption
+                      :type: :hash
+                      :members:
+                        :mode:
+                          :name: Mode
+                          :type: :string
+                        :key:
+                          :name: Key
+                          :type: :string
+                        :key_md_5:
+                          :name: KeyMd5
+                          :type: :string
+                        :initialization_vector:
+                          :name: InitializationVector
+                          :type: :string
           :composition:
             :name: Composition
             :type: :array
@@ -222,6 +423,93 @@
                     :duration:
                       :name: Duration
                       :type: :string
+          :captions:
+            :name: Captions
+            :type: :hash
+            :members:
+              :merge_policy:
+                :name: MergePolicy
+                :type: :string
+              :caption_sources:
+                :name: CaptionSources
+                :type: :array
+                :members:
+                  :name: member
+                  :type: :hash
+                  :members:
+                    :key:
+                      :name: Key
+                      :type: :string
+                    :language:
+                      :name: Language
+                      :type: :string
+                    :time_offset:
+                      :name: TimeOffset
+                      :type: :string
+                    :label:
+                      :name: Label
+                      :type: :string
+                    :encryption:
+                      :name: Encryption
+                      :type: :hash
+                      :members:
+                        :mode:
+                          :name: Mode
+                          :type: :string
+                        :key:
+                          :name: Key
+                          :type: :string
+                        :key_md_5:
+                          :name: KeyMd5
+                          :type: :string
+                        :initialization_vector:
+                          :name: InitializationVector
+                          :type: :string
+              :caption_formats:
+                :name: CaptionFormats
+                :type: :array
+                :members:
+                  :name: member
+                  :type: :hash
+                  :members:
+                    :format:
+                      :name: Format
+                      :type: :string
+                    :pattern:
+                      :name: Pattern
+                      :type: :string
+                    :encryption:
+                      :name: Encryption
+                      :type: :hash
+                      :members:
+                        :mode:
+                          :name: Mode
+                          :type: :string
+                        :key:
+                          :name: Key
+                          :type: :string
+                        :key_md_5:
+                          :name: KeyMd5
+                          :type: :string
+                        :initialization_vector:
+                          :name: InitializationVector
+                          :type: :string
+          :encryption:
+            :name: Encryption
+            :type: :hash
+            :members:
+              :mode:
+                :name: Mode
+                :type: :string
+              :key:
+                :name: Key
+                :type: :string
+              :key_md_5:
+                :name: KeyMd5
+                :type: :string
+              :initialization_vector:
+                :name: InitializationVector
+                :type: :string
     :output_key_prefix:
       :name: OutputKeyPrefix
       :type: :string
@@ -244,6 +532,15 @@
             :members:
               :name: member
               :type: :string
+    :user_metadata:
+      :name: UserMetadata
+      :type: :map
+      :keys:
+        :name: key
+        :type: :string
+      :members:
+        :name: value
+        :type: :string
   :outputs:
     Job:
       :sym: :job
@@ -280,6 +577,22 @@
             Container:
               :sym: :container
               :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
         Output:
           :sym: :output
           :type: :hash
@@ -293,6 +606,22 @@
             ThumbnailPattern:
               :sym: :thumbnail_pattern
               :type: :string
+            ThumbnailEncryption:
+              :sym: :thumbnail_encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
             Rotate:
               :sym: :rotate
               :type: :string
@@ -327,6 +656,22 @@
                 InputKey:
                   :sym: :input_key
                   :type: :string
+                Encryption:
+                  :sym: :encryption
+                  :type: :hash
+                  :members:
+                    Mode:
+                      :sym: :mode
+                      :type: :string
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    KeyMd5:
+                      :sym: :key_md_5
+                      :type: :string
+                    InitializationVector:
+                      :sym: :initialization_vector
+                      :type: :string
             AlbumArt:
               :sym: :album_art
               :type: :hash
@@ -356,6 +701,22 @@
                     AlbumArtFormat:
                       :sym: :album_art_format
                       :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
             Composition:
               :sym: :composition
               :type: :hash
@@ -370,6 +731,87 @@
                     Duration:
                       :sym: :duration
                       :type: :string
+            Captions:
+              :sym: :captions
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                CaptionSources:
+                  :sym: :caption_sources
+                  :type: :hash
+                  :members:
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    Language:
+                      :sym: :language
+                      :type: :string
+                    TimeOffset:
+                      :sym: :time_offset
+                      :type: :string
+                    Label:
+                      :sym: :label
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+                CaptionFormats:
+                  :sym: :caption_formats
+                  :type: :hash
+                  :members:
+                    Format:
+                      :sym: :format
+                      :type: :string
+                    Pattern:
+                      :sym: :pattern
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
         Outputs:
           :sym: :outputs
           :type: :hash
@@ -383,6 +825,22 @@
             ThumbnailPattern:
               :sym: :thumbnail_pattern
               :type: :string
+            ThumbnailEncryption:
+              :sym: :thumbnail_encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
             Rotate:
               :sym: :rotate
               :type: :string
@@ -417,6 +875,22 @@
                 InputKey:
                   :sym: :input_key
                   :type: :string
+                Encryption:
+                  :sym: :encryption
+                  :type: :hash
+                  :members:
+                    Mode:
+                      :sym: :mode
+                      :type: :string
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    KeyMd5:
+                      :sym: :key_md_5
+                      :type: :string
+                    InitializationVector:
+                      :sym: :initialization_vector
+                      :type: :string
             AlbumArt:
               :sym: :album_art
               :type: :hash
@@ -446,6 +920,22 @@
                     AlbumArtFormat:
                       :sym: :album_art_format
                       :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
             Composition:
               :sym: :composition
               :type: :hash
@@ -460,6 +950,87 @@
                     Duration:
                       :sym: :duration
                       :type: :string
+            Captions:
+              :sym: :captions
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                CaptionSources:
+                  :sym: :caption_sources
+                  :type: :hash
+                  :members:
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    Language:
+                      :sym: :language
+                      :type: :string
+                    TimeOffset:
+                      :sym: :time_offset
+                      :type: :string
+                    Label:
+                      :sym: :label
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+                CaptionFormats:
+                  :sym: :caption_formats
+                  :type: :hash
+                  :members:
+                    Format:
+                      :sym: :format
+                      :type: :string
+                    Pattern:
+                      :sym: :pattern
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
         OutputKeyPrefix:
           :sym: :output_key_prefix
           :type: :string
@@ -485,6 +1056,12 @@
         Status:
           :sym: :status
           :type: :string
+        UserMetadata:
+          :sym: :user_metadata
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :string
 - :name: CreatePipeline
   :method: :create_pipeline
   :http:
@@ -495,14 +1072,20 @@
     :name:
       :name: Name
       :type: :string
+      :required: true
     :input_bucket:
       :name: InputBucket
       :type: :string
+      :required: true
     :output_bucket:
       :name: OutputBucket
       :type: :string
     :role:
       :name: Role
+      :type: :string
+      :required: true
+    :aws_kms_key_arn:
+      :name: AwsKmsKeyArn
       :type: :string
     :notifications:
       :name: Notifications
@@ -604,6 +1187,9 @@
         Role:
           :sym: :role
           :type: :string
+        AwsKmsKeyArn:
+          :sym: :aws_kms_key_arn
+          :type: :string
         Notifications:
           :sym: :notifications
           :type: :hash
@@ -676,12 +1262,14 @@
     :name:
       :name: Name
       :type: :string
+      :required: true
     :description:
       :name: Description
       :type: :string
     :container:
       :name: Container
       :type: :string
+      :required: true
     :video:
       :name: Video
       :type: :hash
@@ -1053,6 +1641,22 @@
             Container:
               :sym: :container
               :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
         Output:
           :sym: :output
           :type: :hash
@@ -1066,6 +1670,22 @@
             ThumbnailPattern:
               :sym: :thumbnail_pattern
               :type: :string
+            ThumbnailEncryption:
+              :sym: :thumbnail_encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
             Rotate:
               :sym: :rotate
               :type: :string
@@ -1100,6 +1720,22 @@
                 InputKey:
                   :sym: :input_key
                   :type: :string
+                Encryption:
+                  :sym: :encryption
+                  :type: :hash
+                  :members:
+                    Mode:
+                      :sym: :mode
+                      :type: :string
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    KeyMd5:
+                      :sym: :key_md_5
+                      :type: :string
+                    InitializationVector:
+                      :sym: :initialization_vector
+                      :type: :string
             AlbumArt:
               :sym: :album_art
               :type: :hash
@@ -1129,6 +1765,22 @@
                     AlbumArtFormat:
                       :sym: :album_art_format
                       :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
             Composition:
               :sym: :composition
               :type: :hash
@@ -1143,6 +1795,87 @@
                     Duration:
                       :sym: :duration
                       :type: :string
+            Captions:
+              :sym: :captions
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                CaptionSources:
+                  :sym: :caption_sources
+                  :type: :hash
+                  :members:
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    Language:
+                      :sym: :language
+                      :type: :string
+                    TimeOffset:
+                      :sym: :time_offset
+                      :type: :string
+                    Label:
+                      :sym: :label
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+                CaptionFormats:
+                  :sym: :caption_formats
+                  :type: :hash
+                  :members:
+                    Format:
+                      :sym: :format
+                      :type: :string
+                    Pattern:
+                      :sym: :pattern
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
         Outputs:
           :sym: :outputs
           :type: :hash
@@ -1156,6 +1889,22 @@
             ThumbnailPattern:
               :sym: :thumbnail_pattern
               :type: :string
+            ThumbnailEncryption:
+              :sym: :thumbnail_encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
             Rotate:
               :sym: :rotate
               :type: :string
@@ -1190,6 +1939,22 @@
                 InputKey:
                   :sym: :input_key
                   :type: :string
+                Encryption:
+                  :sym: :encryption
+                  :type: :hash
+                  :members:
+                    Mode:
+                      :sym: :mode
+                      :type: :string
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    KeyMd5:
+                      :sym: :key_md_5
+                      :type: :string
+                    InitializationVector:
+                      :sym: :initialization_vector
+                      :type: :string
             AlbumArt:
               :sym: :album_art
               :type: :hash
@@ -1219,6 +1984,22 @@
                     AlbumArtFormat:
                       :sym: :album_art_format
                       :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
             Composition:
               :sym: :composition
               :type: :hash
@@ -1233,6 +2014,87 @@
                     Duration:
                       :sym: :duration
                       :type: :string
+            Captions:
+              :sym: :captions
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                CaptionSources:
+                  :sym: :caption_sources
+                  :type: :hash
+                  :members:
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    Language:
+                      :sym: :language
+                      :type: :string
+                    TimeOffset:
+                      :sym: :time_offset
+                      :type: :string
+                    Label:
+                      :sym: :label
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+                CaptionFormats:
+                  :sym: :caption_formats
+                  :type: :hash
+                  :members:
+                    Format:
+                      :sym: :format
+                      :type: :string
+                    Pattern:
+                      :sym: :pattern
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
         OutputKeyPrefix:
           :sym: :output_key_prefix
           :type: :string
@@ -1258,6 +2120,12 @@
         Status:
           :sym: :status
           :type: :string
+        UserMetadata:
+          :sym: :user_metadata
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :string
     NextPageToken:
       :sym: :next_page_token
       :type: :string
@@ -1310,6 +2178,22 @@
             Container:
               :sym: :container
               :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
         Output:
           :sym: :output
           :type: :hash
@@ -1323,6 +2207,22 @@
             ThumbnailPattern:
               :sym: :thumbnail_pattern
               :type: :string
+            ThumbnailEncryption:
+              :sym: :thumbnail_encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
             Rotate:
               :sym: :rotate
               :type: :string
@@ -1357,6 +2257,22 @@
                 InputKey:
                   :sym: :input_key
                   :type: :string
+                Encryption:
+                  :sym: :encryption
+                  :type: :hash
+                  :members:
+                    Mode:
+                      :sym: :mode
+                      :type: :string
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    KeyMd5:
+                      :sym: :key_md_5
+                      :type: :string
+                    InitializationVector:
+                      :sym: :initialization_vector
+                      :type: :string
             AlbumArt:
               :sym: :album_art
               :type: :hash
@@ -1386,6 +2302,22 @@
                     AlbumArtFormat:
                       :sym: :album_art_format
                       :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
             Composition:
               :sym: :composition
               :type: :hash
@@ -1400,6 +2332,87 @@
                     Duration:
                       :sym: :duration
                       :type: :string
+            Captions:
+              :sym: :captions
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                CaptionSources:
+                  :sym: :caption_sources
+                  :type: :hash
+                  :members:
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    Language:
+                      :sym: :language
+                      :type: :string
+                    TimeOffset:
+                      :sym: :time_offset
+                      :type: :string
+                    Label:
+                      :sym: :label
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+                CaptionFormats:
+                  :sym: :caption_formats
+                  :type: :hash
+                  :members:
+                    Format:
+                      :sym: :format
+                      :type: :string
+                    Pattern:
+                      :sym: :pattern
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
         Outputs:
           :sym: :outputs
           :type: :hash
@@ -1413,6 +2426,22 @@
             ThumbnailPattern:
               :sym: :thumbnail_pattern
               :type: :string
+            ThumbnailEncryption:
+              :sym: :thumbnail_encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
             Rotate:
               :sym: :rotate
               :type: :string
@@ -1447,6 +2476,22 @@
                 InputKey:
                   :sym: :input_key
                   :type: :string
+                Encryption:
+                  :sym: :encryption
+                  :type: :hash
+                  :members:
+                    Mode:
+                      :sym: :mode
+                      :type: :string
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    KeyMd5:
+                      :sym: :key_md_5
+                      :type: :string
+                    InitializationVector:
+                      :sym: :initialization_vector
+                      :type: :string
             AlbumArt:
               :sym: :album_art
               :type: :hash
@@ -1476,6 +2521,22 @@
                     AlbumArtFormat:
                       :sym: :album_art_format
                       :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
             Composition:
               :sym: :composition
               :type: :hash
@@ -1490,6 +2551,87 @@
                     Duration:
                       :sym: :duration
                       :type: :string
+            Captions:
+              :sym: :captions
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                CaptionSources:
+                  :sym: :caption_sources
+                  :type: :hash
+                  :members:
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    Language:
+                      :sym: :language
+                      :type: :string
+                    TimeOffset:
+                      :sym: :time_offset
+                      :type: :string
+                    Label:
+                      :sym: :label
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+                CaptionFormats:
+                  :sym: :caption_formats
+                  :type: :hash
+                  :members:
+                    Format:
+                      :sym: :format
+                      :type: :string
+                    Pattern:
+                      :sym: :pattern
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
         OutputKeyPrefix:
           :sym: :output_key_prefix
           :type: :string
@@ -1515,6 +2657,12 @@
         Status:
           :sym: :status
           :type: :string
+        UserMetadata:
+          :sym: :user_metadata
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :string
     NextPageToken:
       :sym: :next_page_token
       :type: :string
@@ -1553,6 +2701,9 @@
           :type: :string
         Role:
           :sym: :role
+          :type: :string
+        AwsKmsKeyArn:
+          :sym: :aws_kms_key_arn
           :type: :string
         Notifications:
           :sym: :notifications
@@ -1834,6 +2985,22 @@
             Container:
               :sym: :container
               :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
         Output:
           :sym: :output
           :type: :hash
@@ -1847,6 +3014,22 @@
             ThumbnailPattern:
               :sym: :thumbnail_pattern
               :type: :string
+            ThumbnailEncryption:
+              :sym: :thumbnail_encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
             Rotate:
               :sym: :rotate
               :type: :string
@@ -1881,6 +3064,22 @@
                 InputKey:
                   :sym: :input_key
                   :type: :string
+                Encryption:
+                  :sym: :encryption
+                  :type: :hash
+                  :members:
+                    Mode:
+                      :sym: :mode
+                      :type: :string
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    KeyMd5:
+                      :sym: :key_md_5
+                      :type: :string
+                    InitializationVector:
+                      :sym: :initialization_vector
+                      :type: :string
             AlbumArt:
               :sym: :album_art
               :type: :hash
@@ -1910,6 +3109,22 @@
                     AlbumArtFormat:
                       :sym: :album_art_format
                       :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
             Composition:
               :sym: :composition
               :type: :hash
@@ -1924,6 +3139,87 @@
                     Duration:
                       :sym: :duration
                       :type: :string
+            Captions:
+              :sym: :captions
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                CaptionSources:
+                  :sym: :caption_sources
+                  :type: :hash
+                  :members:
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    Language:
+                      :sym: :language
+                      :type: :string
+                    TimeOffset:
+                      :sym: :time_offset
+                      :type: :string
+                    Label:
+                      :sym: :label
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+                CaptionFormats:
+                  :sym: :caption_formats
+                  :type: :hash
+                  :members:
+                    Format:
+                      :sym: :format
+                      :type: :string
+                    Pattern:
+                      :sym: :pattern
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
         Outputs:
           :sym: :outputs
           :type: :hash
@@ -1937,6 +3233,22 @@
             ThumbnailPattern:
               :sym: :thumbnail_pattern
               :type: :string
+            ThumbnailEncryption:
+              :sym: :thumbnail_encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
             Rotate:
               :sym: :rotate
               :type: :string
@@ -1971,6 +3283,22 @@
                 InputKey:
                   :sym: :input_key
                   :type: :string
+                Encryption:
+                  :sym: :encryption
+                  :type: :hash
+                  :members:
+                    Mode:
+                      :sym: :mode
+                      :type: :string
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    KeyMd5:
+                      :sym: :key_md_5
+                      :type: :string
+                    InitializationVector:
+                      :sym: :initialization_vector
+                      :type: :string
             AlbumArt:
               :sym: :album_art
               :type: :hash
@@ -2000,6 +3328,22 @@
                     AlbumArtFormat:
                       :sym: :album_art_format
                       :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
             Composition:
               :sym: :composition
               :type: :hash
@@ -2014,6 +3358,87 @@
                     Duration:
                       :sym: :duration
                       :type: :string
+            Captions:
+              :sym: :captions
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                CaptionSources:
+                  :sym: :caption_sources
+                  :type: :hash
+                  :members:
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    Language:
+                      :sym: :language
+                      :type: :string
+                    TimeOffset:
+                      :sym: :time_offset
+                      :type: :string
+                    Label:
+                      :sym: :label
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+                CaptionFormats:
+                  :sym: :caption_formats
+                  :type: :hash
+                  :members:
+                    Format:
+                      :sym: :format
+                      :type: :string
+                    Pattern:
+                      :sym: :pattern
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
         OutputKeyPrefix:
           :sym: :output_key_prefix
           :type: :string
@@ -2039,6 +3464,12 @@
         Status:
           :sym: :status
           :type: :string
+        UserMetadata:
+          :sym: :user_metadata
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :string
 - :name: ReadPipeline
   :method: :read_pipeline
   :http:
@@ -2073,6 +3504,9 @@
           :type: :string
         Role:
           :sym: :role
+          :type: :string
+        AwsKmsKeyArn:
+          :sym: :aws_kms_key_arn
           :type: :string
         Notifications:
           :sym: :notifications
@@ -2312,15 +3746,19 @@
     :role:
       :name: Role
       :type: :string
+      :required: true
     :input_bucket:
       :name: InputBucket
       :type: :string
+      :required: true
     :output_bucket:
       :name: OutputBucket
       :type: :string
+      :required: true
     :topics:
       :name: Topics
       :type: :array
+      :required: true
       :members:
         :name: member
         :type: :string
@@ -2349,6 +3787,9 @@
       :type: :string
     :role:
       :name: Role
+      :type: :string
+    :aws_kms_key_arn:
+      :name: AwsKmsKeyArn
       :type: :string
     :notifications:
       :name: Notifications
@@ -2450,6 +3891,9 @@
         Role:
           :sym: :role
           :type: :string
+        AwsKmsKeyArn:
+          :sym: :aws_kms_key_arn
+          :type: :string
         Notifications:
           :sym: :notifications
           :type: :hash
@@ -2524,6 +3968,7 @@
     :notifications:
       :name: Notifications
       :type: :hash
+      :required: true
       :members:
         :progressing:
           :name: Progressing
@@ -2562,6 +4007,9 @@
           :type: :string
         Role:
           :sym: :role
+          :type: :string
+        AwsKmsKeyArn:
+          :sym: :aws_kms_key_arn
           :type: :string
         Notifications:
           :sym: :notifications
@@ -2637,6 +4085,7 @@
     :status:
       :name: Status
       :type: :string
+      :required: true
   :outputs:
     Pipeline:
       :sym: :pipeline
@@ -2662,6 +4111,9 @@
           :type: :string
         Role:
           :sym: :role
+          :type: :string
+        AwsKmsKeyArn:
+          :sym: :aws_kms_key_arn
           :type: :string
         Notifications:
           :sym: :notifications

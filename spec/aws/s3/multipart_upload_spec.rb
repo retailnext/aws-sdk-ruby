@@ -113,7 +113,7 @@ module AWS
                                                    double("resp",
                                                           :body => "FOO",
                                                           :status => 404)))
-          upload.exists?.should be_false
+          upload.exists?.should be_falsey
         end
 
         it 'should not rescue other client errors' do
@@ -209,12 +209,12 @@ module AWS
 
         it 'should return true when the storage class is :reduced_redundancy' do
           upload.stub(:storage_class).and_return(:reduced_redundancy)
-          upload.reduced_redundancy?.should be_true
+          upload.reduced_redundancy?.should be_truthy
         end
 
         it 'should return false when the storage class is something else' do
           upload.stub(:storage_class).and_return(:foo)
-          upload.reduced_redundancy?.should be_false
+          upload.reduced_redundancy?.should be_falsey
         end
 
       end
@@ -231,7 +231,7 @@ module AWS
 
         it 'should set aborted?' do
           upload.abort
-          upload.aborted?.should be_true
+          upload.aborted?.should be_truthy
         end
 
       end
@@ -412,7 +412,7 @@ module AWS
             it 'should raise an error' do
               upload.stub(:completed_parts).and_return([])
               lambda { upload.complete }.
-                should raise_error("no parts uploaded")
+                should raise_error(MultipartUpload::EmptyUploadError, "Unable to complete an empty upload.")
             end
 
           end
@@ -463,7 +463,7 @@ module AWS
             it 'should raise an error' do
               resp.stub(:parts).and_return([])
               lambda { upload.complete(:remote_parts) }.
-                should raise_error("no parts uploaded")
+                should raise_error(MultipartUpload::EmptyUploadError, "Unable to complete an empty upload.")
             end
 
           end

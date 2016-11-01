@@ -55,11 +55,13 @@ module AWS
         signed_headers = 'Host'
 
         if options[:acl]
-          request.add_param("X-Amz-Acl", options[:acl].to_s.gsub(/_/, '-'))
+          request.add_param("x-amz-acl", options[:acl].to_s.gsub(/_/, '-'))
         end
 
+        # must be sent along with the PUT request headers
         if options[:content_md5]
-          request.add_param("Content-MD5", options[:content_md5])
+          request.headers['Content-MD5'] = options[:content_md5]
+          signed_headers << ';Content-MD5'
         end
 
         request_params = Core::Signers::S3::QUERY_PARAMS.map do |p|
@@ -69,10 +71,13 @@ module AWS
           end
         end
 
+        token = client.credential_provider.session_token
+
         request.add_param("X-Amz-Algorithm", "AWS4-HMAC-SHA256")
         request.add_param("X-Amz-Date", now)
         request.add_param("X-Amz-SignedHeaders", signed_headers)
         request.add_param("X-Amz-Expires", seconds_away(options[:expires]))
+        request.add_param('X-Amz-Security-Token', token) if token
         request.add_param("X-Amz-Credential", signer.credential(now))
         request.add_param("X-Amz-Signature", signature(request, now))
 

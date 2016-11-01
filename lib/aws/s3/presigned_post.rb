@@ -95,8 +95,9 @@ module AWS
                         :metadata,
                         :content_length,
                         :conditions,
-                        :ignore]
-      
+                        :ignore,
+                        :secure]
+
       # Creates a new presigned post object.
       #
       # @param [Bucket] bucket The bucket to which data can be uploaded
@@ -178,7 +179,7 @@ module AWS
       #   If the value is set to 201, Amazon S3 returns an XML
       #   document with a 201 status code.  For information on the
       #   content of the XML document, see
-      #   [POST Object](http://docs.amazonwebservices.com/AmazonS3/2006-03-01/API/index.html?RESTObjectPOST.html).
+      #   [POST Object](http://docs.aws.amazon.com/AmazonS3/2006-03-01/API/index.html?RESTObjectPOST.html).
       #
       # @option opts [Hash] :metadata A hash of the metadata fields
       #   included in the signed fields.  Additional metadata fields
@@ -206,7 +207,7 @@ module AWS
         @content_length = range_value(opts[:content_length])
         @conditions = opts[:conditions] || {}
         @ignored_fields = [opts[:ignore]].flatten.compact
-        @expires = opts[:expires]
+        @expires = opts[:expires] || Time.now.utc + 60*60
 
         super
 
@@ -396,17 +397,16 @@ module AWS
       # @api private
       private
       def format_expiration
-        time = expires || Time.now.utc + 60*60
         time =
-          case time
+          case expires
           when Time
-            time
+            expires
           when DateTime
-            Time.parse(time.to_s)
+            Time.parse(expires.to_s)
           when Integer
-            (Time.now + time)
+            (Time.now + expires)
           when String
-            Time.parse(time)
+            Time.parse(expires)
           end
         time.utc.iso8601
       end

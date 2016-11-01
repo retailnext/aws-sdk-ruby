@@ -11,7 +11,7 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-require 'digest'
+require 'openssl'
 
 module AWS
   class SQS
@@ -77,6 +77,9 @@ module AWS
 
         alias_method :id, :message_id
 
+        # @return [String] Returns the request ID.
+        attr_accessor :request_id
+
         # @return [String] Returns an MD5 digest of the message body
         #   string.  You can use this to verify that SQS received your
         #   message correctly.
@@ -120,13 +123,14 @@ module AWS
         client_opts[:message_body] = body
 
         response = client.send_message(client_opts)
-        
+
         msg = SentMessage.new
         msg.message_id = response[:message_id]
+        msg.request_id = (response[:response_metadata] || {})[:request_id]
         msg.md5 = response[:md5_of_message_body]
 
         verify_send_message_checksum body, msg.md5
-        
+
         msg
 
       end
@@ -184,6 +188,10 @@ module AWS
       #   See {ReceivedMessage} for documentation on each
       #   attribute's meaning.
       #
+      # @option opts [Array<String>] :message_attribute_names A list of
+      #   message attribute names to receive. These will be available on
+      #   the {ReceivedMessage} as `#message_attributes`.
+      #
       # @yieldparam [ReceivedMessage] message Each message that was received.
       #
       # @return [ReceivedMessage] Returns the received message (or messages)
@@ -200,7 +208,9 @@ module AWS
           ReceivedMessage.new(self, m[:message_id], m[:receipt_handle],
             :body => m[:body],
             :md5 => m[:md5_of_body],
-            :attributes => m[:attributes])
+            :request_id => (resp[:response_metadata] || {})[:request_id],
+            :attributes => m[:attributes],
+            :message_attributes => m[:message_attributes])
         end
 
         if block
@@ -304,7 +314,7 @@ module AWS
 
       # @return [Integer] The approximate number of visible messages
       #   in a queue.  For more information, see
-      #   [Resources Required to Process Messages](http://docs.amazonwebservices.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/IntroductionArticle.html#ApproximateNumber)
+      #   [Resources Required to Process Messages](http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/IntroductionArticle.html#ApproximateNumber)
       #   in the Amazon SQS Developer Guide.
       def approximate_number_of_messages
         get_attribute("ApproximateNumberOfMessages").to_i
@@ -313,7 +323,7 @@ module AWS
 
       # @return [Integer] The approximate number of messages that
       #   are not timed-out and not deleted.  For more information,
-      #   see [Resources Required to Process Messages](http://docs.amazonwebservices.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/IntroductionArticle.html#ApproximateNumber)
+      #   see [Resources Required to Process Messages](http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/IntroductionArticle.html#ApproximateNumber)
       #   in the Amazon SQS Developer Guide.
       def approximate_number_of_messages_not_visible
         get_attribute("ApproximateNumberOfMessagesNotVisible").to_i
@@ -322,7 +332,7 @@ module AWS
 
       # @return [Integer] Returns the visibility timeout for the
       #   queue. For more information about visibility timeout, see
-      #   [Visibility Timeout](http://docs.amazonwebservices.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/IntroductionArticle.html#AboutVT)
+      #   [Visibility Timeout](http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/IntroductionArticle.html#AboutVT)
       #   in the Amazon SQS Developer Guide.
       def visibility_timeout
         get_attribute("VisibilityTimeout").to_i
@@ -539,11 +549,11 @@ module AWS
         client_opts[:entries] = entries
 
         response = client.send_message_batch(client_opts)
-        
+
         failed = batch_failures(entries, response, true)
 
         checksum_failed = verify_send_message_batch_checksum entries, response
-        
+
         sent = response[:successful].collect do |sent|
           msg = SentMessage.new
           msg.message_id = sent[:message_id]
@@ -696,11 +706,11 @@ module AWS
           if include_batch_index
             details[:batch_index] = failure[:id].to_i
           end
-          
+
           if message_body = entry[:message_body]
             details[:message_body] = message_body
           end
-          
+
           if handle = entry[:receipt_handle]
             details[:receipt_handle] = handle
           end
@@ -737,6 +747,8 @@ module AWS
           opts[:limit]
         receive_opts[:wait_time_seconds] = opts[:wait_time_seconds] if
           opts[:wait_time_seconds]
+        receive_opts[:message_attribute_names] = opts[:message_attribute_names] if
+          opts[:message_attribute_names]
 
         if names = opts[:attributes]
           receive_opts[:attribute_names] = names.map do |name|
@@ -746,6 +758,7 @@ module AWS
             name
           end
         end
+
         receive_opts
       end
 
@@ -797,7 +810,7 @@ module AWS
       # @api private
       protected
       def calculate_checksum data
-        Digest::MD5.hexdigest data
+        OpenSSL::Digest::MD5.hexdigest data
       end
 
       # @api private

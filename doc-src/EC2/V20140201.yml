@@ -1,8 +1,9 @@
 ---
 :accept_vpc_peering_connection: "Calls the AcceptVpcPeeringConnection API operation.\n@param
-  [Hash] options\n  * `:vpc_peering_connection_id` - (String) \n@return [Core::Response]
-  The `#data` method of the response object returns a hash with the following structure:\n\n
-  \ * `:vpc_peering_connection` - (Hash)\n    * `:accepter_vpc_info` - (Hash)\n      *
+  [Hash] options\n  * `:dry_run` - (Boolean) \n  * `:vpc_peering_connection_id` -
+  (String) The ID of the VPC peering connection.\n@return [Core::Response] The `#data`
+  method of the response object returns a hash with the following structure:\n\n  *
+  `:vpc_peering_connection` - (Hash)\n    * `:accepter_vpc_info` - (Hash)\n      *
   `:cidr_block` - (String)\n      * `:owner_id` - (String)\n      * `:vpc_id` - (String)\n
   \   * `:expiration_time` - (Time)\n    * `:requester_vpc_info` - (Hash)\n      *
   `:cidr_block` - (String)\n      * `:owner_id` - (String)\n      * `:vpc_id` - (String)\n
@@ -360,13 +361,14 @@
   \     * `:instance_owner_id` - (String)\n      * `:device_index` - (Integer)\n      *
   `:status` - (String)\n      * `:attach_time` - (Time)\n      * `:delete_on_termination`
   - (Boolean)\n    * `:association` - (Hash)\n      * `:public_ip` - (String)\n      *
-  `:ip_owner_id` - (String)\n      * `:allocation_id` - (String)\n      * `:association_id`
-  - (String)\n    * `:tag_set` - (Array<Hash>)\n      * `:key` - (String)\n      *
-  `:value` - (String)\n    * `:private_ip_addresses_set` - (Array<Hash>)\n      *
-  `:private_ip_address` - (String)\n      * `:private_dns_name` - (String)\n      *
-  `:primary` - (Boolean)\n      * `:association` - (Hash)\n        * `:public_ip`
-  - (String)\n        * `:ip_owner_id` - (String)\n        * `:allocation_id` - (String)\n
-  \       * `:association_id` - (String)"
+  `:public_dns_name` - (String)\n      * `:ip_owner_id` - (String)\n      * `:allocation_id`
+  - (String)\n      * `:association_id` - (String)\n    * `:tag_set` - (Array<Hash>)\n
+  \     * `:key` - (String)\n      * `:value` - (String)\n    * `:private_ip_addresses_set`
+  - (Array<Hash>)\n      * `:private_ip_address` - (String)\n      * `:private_dns_name`
+  - (String)\n      * `:primary` - (Boolean)\n      * `:association` - (Hash)\n        *
+  `:public_ip` - (String)\n        * `:public_dns_name` - (String)\n        * `:ip_owner_id`
+  - (String)\n        * `:allocation_id` - (String)\n        * `:association_id` -
+  (String)"
 :create_placement_group: "Calls the CreatePlacementGroup API operation.\n@param [Hash]
   options\n  * `:dry_run` - (Boolean) \n  * `:group_name` - *required* - (String)
   A name for the placement group. Constraints: Up to 255 ASCII characters\n  * `:strategy`
@@ -412,7 +414,8 @@
   attached to your VPC.\n  * `:instance_id` - (String) The ID of a NAT instance in
   your VPC. The operation fails if you specify an instance ID unless exactly one network
   interface is attached.\n  * `:network_interface_id` - (String) The ID of a network
-  interface.\n  * `:vpc_peering_connection_id` - (String) \n@return [Core::Response]"
+  interface.\n  * `:vpc_peering_connection_id` - (String) The ID of a VPC peering
+  connection.\n@return [Core::Response]"
 :create_route_table: "Calls the CreateRouteTable API operation.\n@param [Hash] options\n
   \ * `:dry_run` - (Boolean) \n  * `:vpc_id` - *required* - (String) The ID of the
   VPC.\n@return [Core::Response] The `#data` method of the response object returns
@@ -482,7 +485,8 @@
   from which to create the volume.\n  * `:availability_zone` - *required* - (String)
   The Availability Zone in which to create the volume. Use DescribeAvailabilityZones
   to list the Availability Zones that are currently available to you.\n  * `:volume_type`
-  - (String) The volume type. Default: standard  Valid values include:\n    * `standard`\n
+  - (String) The volume type. This can be standard for standard EBS volumes or io1
+  for Provisioned IOPS volumes. Default: standard  Valid values include:\n    * `standard`\n
   \   * `io1`\n  * `:iops` - (Integer) The number of I/O operations per second (IOPS)
   that the volume supports. This parameter is not used with standard volumes, but
   is required when the volume type is io1.\n@return [Core::Response] The `#data` method
@@ -509,16 +513,18 @@
   \     * `:key` - (String)\n      * `:value` - (String)\n    * `:instance_tenancy`
   - (String)\n    * `:is_default` - (Boolean)"
 :create_vpc_peering_connection: "Calls the CreateVpcPeeringConnection API operation.\n@param
-  [Hash] options\n  * `:vpc_id` - (String) \n  * `:peer_vpc_id` - (String) \n  * `:peer_owner_id`
-  - (String) \n@return [Core::Response] The `#data` method of the response object
-  returns a hash with the following structure:\n\n  * `:vpc_peering_connection` -
-  (Hash)\n    * `:accepter_vpc_info` - (Hash)\n      * `:cidr_block` - (String)\n
-  \     * `:owner_id` - (String)\n      * `:vpc_id` - (String)\n    * `:expiration_time`
-  - (Time)\n    * `:requester_vpc_info` - (Hash)\n      * `:cidr_block` - (String)\n
-  \     * `:owner_id` - (String)\n      * `:vpc_id` - (String)\n    * `:status` -
-  (Hash)\n      * `:code` - (String)\n      * `:message` - (String)\n    * `:tag_set`
-  - (Array<Hash>)\n      * `:key` - (String)\n      * `:value` - (String)\n    * `:vpc_peering_connection_id`
-  - (String)"
+  [Hash] options\n  * `:dry_run` - (Boolean) \n  * `:vpc_id` - (String) The ID of
+  the requester VPC.\n  * `:peer_vpc_id` - (String) The ID of the VPC with which you
+  are creating the VPC peering connection.\n  * `:peer_owner_id` - (String) The AWS
+  account ID of the owner of the peer VPC. Default: Your AWS account ID\n@return [Core::Response]
+  The `#data` method of the response object returns a hash with the following structure:\n\n
+  \ * `:vpc_peering_connection` - (Hash)\n    * `:accepter_vpc_info` - (Hash)\n      *
+  `:cidr_block` - (String)\n      * `:owner_id` - (String)\n      * `:vpc_id` - (String)\n
+  \   * `:expiration_time` - (Time)\n    * `:requester_vpc_info` - (Hash)\n      *
+  `:cidr_block` - (String)\n      * `:owner_id` - (String)\n      * `:vpc_id` - (String)\n
+  \   * `:status` - (Hash)\n      * `:code` - (String)\n      * `:message` - (String)\n
+  \   * `:tag_set` - (Array<Hash>)\n      * `:key` - (String)\n      * `:value` -
+  (String)\n    * `:vpc_peering_connection_id` - (String)"
 :create_vpn_connection: "Calls the CreateVpnConnection API operation.\n@param [Hash]
   options\n  * `:dry_run` - (Boolean) \n  * `:type` - *required* - (String) The type
   of VPN connection.\n  * `:customer_gateway_id` - *required* - (String) The ID of
@@ -618,9 +624,10 @@
   - (Boolean) \n  * `:vpc_id` - *required* - (String) The ID of the VPC.\n@return
   [Core::Response]"
 :delete_vpc_peering_connection: "Calls the DeleteVpcPeeringConnection API operation.\n@param
-  [Hash] options\n  * `:vpc_peering_connection_id` - (String) \n@return [Core::Response]
-  The `#data` method of the response object returns a hash with the following structure:\n\n
-  \ * `:return` - (Boolean)"
+  [Hash] options\n  * `:dry_run` - (Boolean) \n  * `:vpc_peering_connection_id` -
+  (String) The ID of the VPC peering connection.\n@return [Core::Response] The `#data`
+  method of the response object returns a hash with the following structure:\n\n  *
+  `:return` - (Boolean)"
 :delete_vpn_connection: "Calls the DeleteVpnConnection API operation.\n@param [Hash]
   options\n  * `:dry_run` - (Boolean) \n  * `:vpn_connection_id` - *required* - (String)
   The ID of the VPN connection.\n@return [Core::Response]"
@@ -964,31 +971,31 @@
   request. state-reason-code - The reason code for the state change. state-reason-message
   - A message that describes the state change. subnet-id - The ID of the subnet for
   the instance. tag:key=value - The key/value combination of a tag assigned to the
-  resource. tag-key - The key of a tag assigned to the resource. This filter is independent
-  of the tag-value filter. For example, if you use both the filter \"tag-key=Purpose\"
-  and the filter \"tag-value=X\", you get any resources assigned both the tag key
-  Purpose (regardless of what the tag's value is), and the tag value X (regardless
-  of what the tag's key is). If you want to list only resources where Purpose is X,
-  see the tag:key=value filter. tag-value - The value of a tag assigned to the resource.
-  This filter is independent of the tag-key filter. virtualization-type - The virtualization
-  type of the instance (paravirtual | hvm). vpc-id - The ID of the VPC that the instance
-  is running in. network-interface.description - The description of the network interface.
-  network-interface.subnet-id - The ID of the subnet for the network interface. network-interface.vpc-id
-  - The ID of the VPC for the network interface. network-interface.network-interface.id
-  - The ID of the network interface. network-interface.owner-id - The ID of the owner
-  of the network interface. network-interface.availability-zone - The Availability
-  Zone for the network interface. network-interface.requester-id - The requester ID
-  for the network interface. network-interface.requester-managed - Indicates whether
-  the network interface is being managed by AWS. network-interface.status - The status
-  of the network interface (available) | in-use). network-interface.mac-address -
-  The MAC address of the network interface. network-interface-private-dns-name - The
-  private DNS name of the network interface. network-interface.source-destination-check
-  - Whether the network interface performs source/destination checking. A value of
-  \ `true`  means checking is enabled, and  `false`  means checking is disabled. The
-  value must be  `false`  for the network interface to perform network address translation
-  (NAT) in your VPC. network-interface.group-id - The ID of a security group associated
-  with the network interface. network-interface.group-name - The name of a security
-  group associated with the network interface. network-interface.attachment.attachment-id
+  resource, where tag:key is the tag's key. tag-key - The key of a tag assigned to
+  the resource. This filter is independent of the tag-value filter. For example, if
+  you use both the filter \"tag-key=Purpose\" and the filter \"tag-value=X\", you
+  get any resources assigned both the tag key Purpose (regardless of what the tag's
+  value is), and the tag value X (regardless of what the tag's key is). If you want
+  to list only resources where Purpose is X, see the tag:key=value filter. tag-value
+  - The value of a tag assigned to the resource. This filter is independent of the
+  tag-key filter. virtualization-type - The virtualization type of the instance (paravirtual
+  | hvm). vpc-id - The ID of the VPC that the instance is running in. network-interface.description
+  - The description of the network interface. network-interface.subnet-id - The ID
+  of the subnet for the network interface. network-interface.vpc-id - The ID of the
+  VPC for the network interface. network-interface.network-interface.id - The ID of
+  the network interface. network-interface.owner-id - The ID of the owner of the network
+  interface. network-interface.availability-zone - The Availability Zone for the network
+  interface. network-interface.requester-id - The requester ID for the network interface.
+  network-interface.requester-managed - Indicates whether the network interface is
+  being managed by AWS. network-interface.status - The status of the network interface
+  (available) | in-use). network-interface.mac-address - The MAC address of the network
+  interface. network-interface-private-dns-name - The private DNS name of the network
+  interface. network-interface.source-destination-check - Whether the network interface
+  performs source/destination checking. A value of  `true`  means checking is enabled,
+  and  `false`  means checking is disabled. The value must be  `false`  for the network
+  interface to perform network address translation (NAT) in your VPC. network-interface.group-id
+  - The ID of a security group associated with the network interface. network-interface.group-name
+  - The name of a security group associated with the network interface. network-interface.attachment.attachment-id
   - The ID of the interface attachment. network-interface.attachment.instance-id -
   The ID of the instance to which the network interface is attached. network-interface.attachment.instance-owner-id
   - The owner ID of the instance to which the network interface is attached. network-interface.addresses.private-ip-address
@@ -1194,13 +1201,14 @@
   \     * `:instance_id` - (String)\n      * `:instance_owner_id` - (String)\n      *
   `:device_index` - (Integer)\n      * `:status` - (String)\n      * `:attach_time`
   - (Time)\n      * `:delete_on_termination` - (Boolean)\n    * `:association` - (Hash)\n
-  \     * `:public_ip` - (String)\n      * `:ip_owner_id` - (String)\n      * `:allocation_id`
-  - (String)\n      * `:association_id` - (String)\n    * `:tag_set` - (Array<Hash>)\n
-  \     * `:key` - (String)\n      * `:value` - (String)\n    * `:private_ip_addresses_set`
-  - (Array<Hash>)\n      * `:private_ip_address` - (String)\n      * `:private_dns_name`
-  - (String)\n      * `:primary` - (Boolean)\n      * `:association` - (Hash)\n        *
-  `:public_ip` - (String)\n        * `:ip_owner_id` - (String)\n        * `:allocation_id`
-  - (String)\n        * `:association_id` - (String)"
+  \     * `:public_ip` - (String)\n      * `:public_dns_name` - (String)\n      *
+  `:ip_owner_id` - (String)\n      * `:allocation_id` - (String)\n      * `:association_id`
+  - (String)\n    * `:tag_set` - (Array<Hash>)\n      * `:key` - (String)\n      *
+  `:value` - (String)\n    * `:private_ip_addresses_set` - (Array<Hash>)\n      *
+  `:private_ip_address` - (String)\n      * `:private_dns_name` - (String)\n      *
+  `:primary` - (Boolean)\n      * `:association` - (Hash)\n        * `:public_ip`
+  - (String)\n        * `:public_dns_name` - (String)\n        * `:ip_owner_id` -
+  (String)\n        * `:allocation_id` - (String)\n        * `:association_id` - (String)"
 :describe_placement_groups: "Calls the DescribePlacementGroups API operation.\n@param
   [Hash] options\n  * `:dry_run` - (Boolean) \n  * `:group_names` - (Array&lt;<String>)
   One or more placement group names. Default: Describes all your placement groups,
@@ -1325,43 +1333,45 @@
   \   * `i2.8xlarge`\n    * `hi1.4xlarge`\n    * `hs1.8xlarge`\n    * `c1.medium`\n
   \   * `c1.xlarge`\n    * `c3.large`\n    * `c3.xlarge`\n    * `c3.2xlarge`\n    *
   `c3.4xlarge`\n    * `c3.8xlarge`\n    * `cc1.4xlarge`\n    * `cc2.8xlarge`\n    *
-  `g2.2xlarge`\n    * `cg1.4xlarge`\n  * `:availability_zone` - (String) The Availability
-  Zone in which the Reserved Instance can be used.\n  * `:product_description` - (String)
-  The Reserved Instance description. Instances that include (Amazon VPC) in the description
-  are for use with Amazon VPC.  Valid values include:\n    * `Linux/UNIX`\n    * `Linux/UNIX
-  (Amazon VPC)`\n    * `Windows`\n    * `Windows (Amazon VPC)`\n  * `:filters` - (Array&lt;<Hash>)
-  One or more filters. availability-zone - The Availability Zone where the Reserved
-  Instance can be used. duration - The duration of the Reserved Instance (for example,
-  one year or three years), in seconds. fixed-price - The purchase price of the Reserved
-  Instance (for example, 9800.0). instance-type - The instance type on which the Reserved
-  Instance can be used. marketplace - Set to  `true`  to show only Reserved Instance
-  Marketplace offerings. When this filter is not used, which is the default behavior,
-  all offerings from AWS and Reserved Instance Marketplace are listed. product-description
-  - The description of the Reserved Instance (Linux/UNIX | Linux/UNIX (Amazon VPC)
-  | Windows | Windows (Amazon VPC)). reserved-instances-offering-id - The Reserved
-  Instances offering ID. usage-price - The usage price of the Reserved Instance, per
-  hour (for example, 0.84).\n    * `:name` - (String) The name of the filter.\n    *
-  `:values` - (Array&lt;<String>) One or more filter values.\n  * `:instance_tenancy`
-  - (String) The tenancy of the Reserved Instance offering. A Reserved Instance with
-  dedicated tenancy runs on single-tenant hardware and can only be launched within
-  a VPC. Default: default  Valid values include:\n    * `default`\n    * `dedicated`\n
-  \ * `:offering_type` - (String) The Reserved Instance offering type.  Valid values
-  include:\n    * `Heavy Utilization`\n    * `Medium Utilization`\n    * `Light Utilization`\n
-  \ * `:next_token` - (String) The token to use when requesting the next paginated
-  set of offerings.\n  * `:max_results` - (Integer) The maximum number of offerings
-  to return.\n  * `:include_marketplace` - (Boolean) Include Marketplace offerings
-  in the response.\n  * `:min_duration` - (Integer) The minimum duration (in seconds)
-  to filter when searching for offerings.\n  * `:max_duration` - (Integer) The maximum
-  duration (in seconds) to filter when searching for offerings.\n  * `:max_instance_count`
-  - (Integer) The maximum number of instances to filter when searching for offerings.\n@return
-  [Core::Response] The `#data` method of the response object returns a hash with the
-  following structure:\n\n  * `:reserved_instances_offerings_set` - (Array<Hash>)\n
-  \   * `:reserved_instances_offering_id` - (String)\n    * `:instance_type` - (String)\n
-  \   * `:availability_zone` - (String)\n    * `:duration` - (Integer)\n    * `:usage_price`
-  - (Numeric)\n    * `:fixed_price` - (Numeric)\n    * `:product_description` - (String)\n
-  \   * `:instance_tenancy` - (String)\n    * `:currency_code` - (String)\n    * `:offering_type`
-  - (String)\n    * `:recurring_charges` - (Array<Hash>)\n      * `:frequency` - (String)\n
-  \     * `:amount` - (Numeric)\n    * `:marketplace` - (Boolean)\n    * `:pricing_details_set`
+  `g2.2xlarge`\n    * `cg1.4xlarge`\n    * `r3.large`\n    * `r3.xlarge`\n    * `r3.2xlarge`\n
+  \   * `r3.4xlarge`\n    * `r3.8xlarge`\n  * `:availability_zone` - (String) The
+  Availability Zone in which the Reserved Instance can be used.\n  * `:product_description`
+  - (String) The Reserved Instance description. Instances that include (Amazon VPC)
+  in the description are for use with Amazon VPC.  Valid values include:\n    * `Linux/UNIX`\n
+  \   * `Linux/UNIX (Amazon VPC)`\n    * `Windows`\n    * `Windows (Amazon VPC)`\n
+  \ * `:filters` - (Array&lt;<Hash>) One or more filters. availability-zone - The
+  Availability Zone where the Reserved Instance can be used. duration - The duration
+  of the Reserved Instance (for example, one year or three years), in seconds. fixed-price
+  - The purchase price of the Reserved Instance (for example, 9800.0). instance-type
+  - The instance type on which the Reserved Instance can be used. marketplace - Set
+  to  `true`  to show only Reserved Instance Marketplace offerings. When this filter
+  is not used, which is the default behavior, all offerings from AWS and Reserved
+  Instance Marketplace are listed. product-description - The description of the Reserved
+  Instance (Linux/UNIX | Linux/UNIX (Amazon VPC) | Windows | Windows (Amazon VPC)).
+  reserved-instances-offering-id - The Reserved Instances offering ID. usage-price
+  - The usage price of the Reserved Instance, per hour (for example, 0.84).\n    *
+  `:name` - (String) The name of the filter.\n    * `:values` - (Array&lt;<String>)
+  One or more filter values.\n  * `:instance_tenancy` - (String) The tenancy of the
+  Reserved Instance offering. A Reserved Instance with dedicated tenancy runs on single-tenant
+  hardware and can only be launched within a VPC. Default: default  Valid values include:\n
+  \   * `default`\n    * `dedicated`\n  * `:offering_type` - (String) The Reserved
+  Instance offering type.  Valid values include:\n    * `Heavy Utilization`\n    *
+  `Medium Utilization`\n    * `Light Utilization`\n  * `:next_token` - (String) The
+  token to use when requesting the next paginated set of offerings.\n  * `:max_results`
+  - (Integer) The maximum number of offerings to return.\n  * `:include_marketplace`
+  - (Boolean) Include Marketplace offerings in the response.\n  * `:min_duration`
+  - (Integer) The minimum duration (in seconds) to filter when searching for offerings.\n
+  \ * `:max_duration` - (Integer) The maximum duration (in seconds) to filter when
+  searching for offerings.\n  * `:max_instance_count` - (Integer) The maximum number
+  of instances to filter when searching for offerings.\n@return [Core::Response] The
+  `#data` method of the response object returns a hash with the following structure:\n\n
+  \ * `:reserved_instances_offerings_set` - (Array<Hash>)\n    * `:reserved_instances_offering_id`
+  - (String)\n    * `:instance_type` - (String)\n    * `:availability_zone` - (String)\n
+  \   * `:duration` - (Integer)\n    * `:usage_price` - (Numeric)\n    * `:fixed_price`
+  - (Numeric)\n    * `:product_description` - (String)\n    * `:instance_tenancy`
+  - (String)\n    * `:currency_code` - (String)\n    * `:offering_type` - (String)\n
+  \   * `:recurring_charges` - (Array<Hash>)\n      * `:frequency` - (String)\n      *
+  `:amount` - (Numeric)\n    * `:marketplace` - (Boolean)\n    * `:pricing_details_set`
   - (Array<Hash>)\n      * `:price` - (Numeric)\n      * `:count` - (Integer)\n  *
   `:next_token` - (String)"
 :describe_route_tables: "Calls the DescribeRouteTables API operation.\n@param [Hash]
@@ -1379,27 +1389,28 @@
   | EnableVgwRoutePropagation). route.state - The state of a route in the route table
   (active | blackhole). The blackhole state indicates that the route's target isn't
   available (for example, the specified gateway isn't attached to the VPC, the specified
-  NAT instance has been terminated, and so on). tag:key=value - The key/value combination
-  of a tag assigned to the resource. tag-key - The key of a tag assigned to the resource.
-  This filter is independent of the tag-value filter. For example, if you use both
-  the filter \"tag-key=Purpose\" and the filter \"tag-value=X\", you get any resources
-  assigned both the tag key Purpose (regardless of what the tag's value is), and the
-  tag value X (regardless of what the tag's key is). If you want to list only resources
-  where Purpose is X, see the tag:key=value filter. tag-value - The value of a tag
-  assigned to the resource. This filter is independent of the tag-key filter. vpc-id
-  - The ID of the VPC for the route table.\n    * `:name` - (String) The name of the
-  filter.\n    * `:values` - (Array&lt;<String>) One or more filter values.\n@return
-  [Core::Response] The `#data` method of the response object returns a hash with the
-  following structure:\n\n  * `:route_table_set` - (Array<Hash>)\n    * `:route_table_id`
-  - (String)\n    * `:vpc_id` - (String)\n    * `:route_set` - (Array<Hash>)\n      *
-  `:destination_cidr_block` - (String)\n      * `:gateway_id` - (String)\n      *
-  `:instance_id` - (String)\n      * `:instance_owner_id` - (String)\n      * `:network_interface_id`
-  - (String)\n      * `:vpc_peering_connection_id` - (String)\n      * `:state` -
-  (String)\n      * `:origin` - (String)\n    * `:association_set` - (Array<Hash>)\n
-  \     * `:route_table_association_id` - (String)\n      * `:route_table_id` - (String)\n
-  \     * `:subnet_id` - (String)\n      * `:main` - (Boolean)\n    * `:tag_set` -
-  (Array<Hash>)\n      * `:key` - (String)\n      * `:value` - (String)\n    * `:propagating_vgw_set`
-  - (Array<Hash>)\n      * `:gateway_id` - (String)"
+  NAT instance has been terminated, and so on). route.vpc-peering-connection-id -
+  The ID of a VPC peering connection specified in a route in the table. tag:key=value
+  - The key/value combination of a tag assigned to the resource. tag-key - The key
+  of a tag assigned to the resource. This filter is independent of the tag-value filter.
+  For example, if you use both the filter \"tag-key=Purpose\" and the filter \"tag-value=X\",
+  you get any resources assigned both the tag key Purpose (regardless of what the
+  tag's value is), and the tag value X (regardless of what the tag's key is). If you
+  want to list only resources where Purpose is X, see the tag:key=value filter. tag-value
+  - The value of a tag assigned to the resource. This filter is independent of the
+  tag-key filter. vpc-id - The ID of the VPC for the route table.\n    * `:name` -
+  (String) The name of the filter.\n    * `:values` - (Array&lt;<String>) One or more
+  filter values.\n@return [Core::Response] The `#data` method of the response object
+  returns a hash with the following structure:\n\n  * `:route_table_set` - (Array<Hash>)\n
+  \   * `:route_table_id` - (String)\n    * `:vpc_id` - (String)\n    * `:route_set`
+  - (Array<Hash>)\n      * `:destination_cidr_block` - (String)\n      * `:gateway_id`
+  - (String)\n      * `:instance_id` - (String)\n      * `:instance_owner_id` - (String)\n
+  \     * `:network_interface_id` - (String)\n      * `:vpc_peering_connection_id`
+  - (String)\n      * `:state` - (String)\n      * `:origin` - (String)\n    * `:association_set`
+  - (Array<Hash>)\n      * `:route_table_association_id` - (String)\n      * `:route_table_id`
+  - (String)\n      * `:subnet_id` - (String)\n      * `:main` - (Boolean)\n    *
+  `:tag_set` - (Array<Hash>)\n      * `:key` - (String)\n      * `:value` - (String)\n
+  \   * `:propagating_vgw_set` - (Array<Hash>)\n      * `:gateway_id` - (String)"
 :describe_security_groups: "Calls the DescribeSecurityGroups API operation.\n@param
   [Hash] options\n  * `:dry_run` - (Boolean) \n  * `:group_names` - (Array&lt;<String>)
   [EC2-Classic, default VPC] One or more security group names. Default: Describes
@@ -1408,7 +1419,8 @@
   One or more filters. description - The description of the security group. group-id
   - The ID of the security group. group-name - The name of the security group. ip-permission.cidr
   - A CIDR range that has been granted permission. ip-permission.from-port - The start
-  of port range for the TCP and UDP protocols, or an ICMP type number. ip-permission.group-name
+  of port range for the TCP and UDP protocols, or an ICMP type number. ip-permission.group-id
+  - The ID of a security group that has been granted permission. ip-permission.group-name
   - The name of a security group that has been granted permission. ip-permission.protocol
   - The IP protocol for the permission (tcp | udp | icmp or a protocol number). ip-permission.to-port
   - The end of port range for the TCP and UDP protocols, or an ICMP code. ip-permission.user-id
@@ -1667,16 +1679,17 @@
   tag value X (regardless of what the tag's key is). If you want to list only resources
   where Purpose is X, see the tag:key=value filter. tag-value - The value of a tag
   assigned to the resource. This filter is independent of the tag-key filter. volume-id
-  - The volume ID. volume-type - The Amazon EBS volume type (standard | io1).\n    *
-  `:name` - (String) The name of the filter.\n    * `:values` - (Array&lt;<String>)
-  One or more filter values.\n@return [Core::Response] The `#data` method of the response
-  object returns a hash with the following structure:\n\n  * `:volume_set` - (Array<Hash>)\n
-  \   * `:volume_id` - (String)\n    * `:size` - (Integer)\n    * `:snapshot_id` -
-  (String)\n    * `:availability_zone` - (String)\n    * `:status` - (String)\n    *
-  `:create_time` - (Time)\n    * `:attachment_set` - (Array<Hash>)\n      * `:volume_id`
-  - (String)\n      * `:instance_id` - (String)\n      * `:device` - (String)\n      *
-  `:status` - (String)\n      * `:attach_time` - (Time)\n      * `:delete_on_termination`
-  - (Boolean)\n    * `:tag_set` - (Array<Hash>)\n      * `:key` - (String)\n      *
+  - The volume ID. volume-type - The Amazon EBS volume type. This can be standard
+  for standard EBS volumes or io1 for Provisioned IOPS volumes.\n    * `:name` - (String)
+  The name of the filter.\n    * `:values` - (Array&lt;<String>) One or more filter
+  values.\n@return [Core::Response] The `#data` method of the response object returns
+  a hash with the following structure:\n\n  * `:volume_set` - (Array<Hash>)\n    *
+  `:volume_id` - (String)\n    * `:size` - (Integer)\n    * `:snapshot_id` - (String)\n
+  \   * `:availability_zone` - (String)\n    * `:status` - (String)\n    * `:create_time`
+  - (Time)\n    * `:attachment_set` - (Array<Hash>)\n      * `:volume_id` - (String)\n
+  \     * `:instance_id` - (String)\n      * `:device` - (String)\n      * `:status`
+  - (String)\n      * `:attach_time` - (Time)\n      * `:delete_on_termination` -
+  (Boolean)\n    * `:tag_set` - (Array<Hash>)\n      * `:key` - (String)\n      *
   `:value` - (String)\n    * `:volume_type` - (String)\n    * `:iops` - (Integer)"
 :describe_vpc_attribute: "Calls the DescribeVpcAttribute API operation.\n@param [Hash]
   options\n  * `:dry_run` - (Boolean) \n  * `:vpc_id` - *required* - (String) The
@@ -1686,17 +1699,36 @@
   \ * `:vpc_id` - (String)\n  * `:enable_dns_support` - (Hash)\n    * `:value` - (Boolean)\n
   \ * `:enable_dns_hostnames` - (Hash)\n    * `:value` - (Boolean)"
 :describe_vpc_peering_connections: "Calls the DescribeVpcPeeringConnections API operation.\n@param
-  [Hash] options\n  * `:vpc_peering_connection_ids` - (Array&lt;<String>) \n  * `:filters`
-  - (Array&lt;<Hash>) \n    * `:name` - (String) The name of the filter.\n    * `:values`
-  - (Array&lt;<String>) One or more filter values.\n@return [Core::Response] The `#data`
-  method of the response object returns a hash with the following structure:\n\n  *
-  `:vpc_peering_connection_set` - (Array<Hash>)\n    * `:accepter_vpc_info` - (Hash)\n
-  \     * `:cidr_block` - (String)\n      * `:owner_id` - (String)\n      * `:vpc_id`
-  - (String)\n    * `:expiration_time` - (Time)\n    * `:requester_vpc_info` - (Hash)\n
-  \     * `:cidr_block` - (String)\n      * `:owner_id` - (String)\n      * `:vpc_id`
-  - (String)\n    * `:status` - (Hash)\n      * `:code` - (String)\n      * `:message`
-  - (String)\n    * `:tag_set` - (Array<Hash>)\n      * `:key` - (String)\n      *
-  `:value` - (String)\n    * `:vpc_peering_connection_id` - (String)"
+  [Hash] options\n  * `:dry_run` - (Boolean) \n  * `:vpc_peering_connection_ids` -
+  (Array&lt;<String>) One or more VPC peering connection IDs. Default: Describes all
+  your VPC peering connections.\n  * `:filters` - (Array&lt;<Hash>) One or more filters.
+  accepter-vpc-info.cidr-block - The CIDR block of the peer VPC. accepter-vpc-info.owner-id
+  - The AWS account ID of the owner of the peer VPC. accepter-vpc-info.vpc-id - The
+  ID of the peer VPC. expiration-time - The expiration date and time for the VPC peering
+  connection. requester-vpc-info.cidr-block - The CIDR block of the requester's VPC.
+  requester-vpc-info.owner-id - The AWS account ID of the owner of the requester VPC.
+  requester-vpc-info.vpc-id - The ID of the requester VPC. status-code - The status
+  of the VPC peering connection (pending-acceptance | failed | expired | provisioning
+  | active | deleted | rejected). status-message - A message that provides more information
+  about the status of the VPC peering connection, if applicable. tag:key=value - The
+  key/value combination of a tag assigned to the resource. tag-key - The key of a
+  tag assigned to the resource. This filter is independent of the tag-value filter.
+  For example, if you use both the filter \"tag-key=Purpose\" and the filter \"tag-value=X\",
+  you get any resources assigned both the tag key Purpose (regardless of what the
+  tag's value is), and the tag value X (regardless of what the tag's key is). If you
+  want to list only resources where Purpose is X, see the tag:key=value filter. tag-value
+  - The value of a tag assigned to the resource. This filter is independent of the
+  tag-key filter. vpc-peering-connection-id - The ID of the VPC peering connection.\n
+  \   * `:name` - (String) The name of the filter.\n    * `:values` - (Array&lt;<String>)
+  One or more filter values.\n@return [Core::Response] The `#data` method of the response
+  object returns a hash with the following structure:\n\n  * `:vpc_peering_connection_set`
+  - (Array<Hash>)\n    * `:accepter_vpc_info` - (Hash)\n      * `:cidr_block` - (String)\n
+  \     * `:owner_id` - (String)\n      * `:vpc_id` - (String)\n    * `:expiration_time`
+  - (Time)\n    * `:requester_vpc_info` - (Hash)\n      * `:cidr_block` - (String)\n
+  \     * `:owner_id` - (String)\n      * `:vpc_id` - (String)\n    * `:status` -
+  (Hash)\n      * `:code` - (String)\n      * `:message` - (String)\n    * `:tag_set`
+  - (Array<Hash>)\n      * `:key` - (String)\n      * `:value` - (String)\n    * `:vpc_peering_connection_id`
+  - (String)"
 :describe_vpcs: "Calls the DescribeVpcs API operation.\n@param [Hash] options\n  *
   `:dry_run` - (Boolean) \n  * `:vpc_ids` - (Array&lt;<String>) One or more VPC IDs.
   Default: Describes all your VPCs.\n  * `:filters` - (Array&lt;<Hash>) One or more
@@ -1851,22 +1883,23 @@
   \     * `hs1.8xlarge`\n      * `c1.medium`\n      * `c1.xlarge`\n      * `c3.large`\n
   \     * `c3.xlarge`\n      * `c3.2xlarge`\n      * `c3.4xlarge`\n      * `c3.8xlarge`\n
   \     * `cc1.4xlarge`\n      * `cc2.8xlarge`\n      * `g2.2xlarge`\n      * `cg1.4xlarge`\n
-  \   * `:placement` - (Hash) \n      * `:availability_zone` - (String) The Availability
-  Zone of the instance.\n      * `:group_name` - (String) The name of the placement
-  group the instance is in (for cluster compute instances).\n      * `:tenancy` -
-  (String) The tenancy of the instance (if the instance is running in a VPC). An instance
-  with a tenancy of dedicated runs on single-tenant hardware.  Valid values include:\n
-  \       * `default`\n        * `dedicated`\n    * `:monitoring` - (Boolean) \n    *
-  `:subnet_id` - (String) [EC2-VPC] The ID of the subnet to launch the instance into.\n
-  \   * `:instance_initiated_shutdown_behavior` - (String) Indicates whether an instance
-  stops or terminates when you initiate shutdown from the instance (using the operating
-  system command for system shutdown).  Valid values include:\n      * `stop`\n      *
-  `terminate`\n    * `:private_ip_address` - (String) [EC2-VPC] Optionally, you can
-  use this parameter to assign the instance a specific available IP address from the
-  IP address range of the subnet.\n  * `:disk_images` - (Array&lt;<Hash>) \n    *
-  `:image` - (Hash) \n      * `:format` - *required* - (String) The disk image format.
-  \ Valid values include:\n        * `VMDK`\n        * `RAW`\n        * `VHD`\n      *
-  `:bytes` - *required* - (Integer) \n      * `:import_manifest_url` - *required*
+  \     * `r3.large`\n      * `r3.xlarge`\n      * `r3.2xlarge`\n      * `r3.4xlarge`\n
+  \     * `r3.8xlarge`\n    * `:placement` - (Hash) \n      * `:availability_zone`
+  - (String) The Availability Zone of the instance.\n      * `:group_name` - (String)
+  The name of the placement group the instance is in (for cluster compute instances).\n
+  \     * `:tenancy` - (String) The tenancy of the instance (if the instance is running
+  in a VPC). An instance with a tenancy of dedicated runs on single-tenant hardware.
+  \ Valid values include:\n        * `default`\n        * `dedicated`\n    * `:monitoring`
+  - (Boolean) \n    * `:subnet_id` - (String) [EC2-VPC] The ID of the subnet to launch
+  the instance into.\n    * `:instance_initiated_shutdown_behavior` - (String) Indicates
+  whether an instance stops or terminates when you initiate shutdown from the instance
+  (using the operating system command for system shutdown).  Valid values include:\n
+  \     * `stop`\n      * `terminate`\n    * `:private_ip_address` - (String) [EC2-VPC]
+  Optionally, you can use this parameter to assign the instance a specific available
+  IP address from the IP address range of the subnet.\n  * `:disk_images` - (Array&lt;<Hash>)
+  \n    * `:image` - (Hash) \n      * `:format` - *required* - (String) The disk image
+  format.  Valid values include:\n        * `VMDK`\n        * `RAW`\n        * `VHD`\n
+  \     * `:bytes` - *required* - (Integer) \n      * `:import_manifest_url` - *required*
   - (String) A presigned URL for the import manifest stored in Amazon S3. For information
   about creating a presigned URL for an Amazon S3 object, read the \"Query String
   Request Authentication Alternative\" section of the Authenticating REST Requests
@@ -2048,6 +2081,11 @@
         * `cc2.8xlarge`
         * `g2.2xlarge`
         * `cg1.4xlarge`
+        * `r3.large`
+        * `r3.xlarge`
+        * `r3.2xlarge`
+        * `r3.4xlarge`
+        * `r3.8xlarge`
   @return [Core::Response] The `#data` method of the response object returns a hash with the following structure:
 
     * `:reserved_instances_modification_id` - (String)
@@ -2074,14 +2112,16 @@
   should be auto-enabled for I/O operations.\n@return [Core::Response]"
 :modify_vpc_attribute: "Calls the ModifyVpcAttribute API operation.\n@param [Hash]
   options\n  * `:vpc_id` - *required* - (String) The ID of the VPC.\n  * `:enable_dns_support`
-  - (Hash) Indicates whether DNS resolution is supported for the VPC. If this attribute
-  is  `true` , the Amazon DNS server resolves DNS hostnames for your instances to
-  their corresponding IP addresses; otherwise, it does not.\n    * `:value` - (Boolean)
-  \n  * `:enable_dns_hostnames` - (Hash) Indicates whether the instances launched
-  in the VPC get DNS hostnames. If this attribute is  `true` , instances in the VPC
-  get DNS hostnames; otherwise, they do not. You can only set enableDnsHostnames to
-  \ `true`  if you also set the EnableDnsSupport attribute to  `true` .\n    * `:value`
-  - (Boolean) \n@return [Core::Response]"
+  - (Hash) Indicates whether the DNS resolution is supported for the VPC. If this
+  attribute is  `false` , the Amazon provided DNS service in the VPC that resolves
+  public DNS hostnames to IP addresses is not enabled. If this attribute is  `true`
+  , queries to the Amazon provided DNS server at the 169.254.169.253 IP address, or
+  the reserved IP address at the base of the VPC network range \"plus two\" will succeed.\n
+  \   * `:value` - (Boolean) \n  * `:enable_dns_hostnames` - (Hash) Indicates whether
+  the instances launched in the VPC get DNS hostnames. If this attribute is  `true`
+  , instances in the VPC get DNS hostnames; otherwise, they do not. You can only set
+  enableDnsHostnames to  `true`  if you also set the EnableDnsSupport attribute to
+  \ `true` .\n    * `:value` - (Boolean) \n@return [Core::Response]"
 :monitor_instances: "Calls the MonitorInstances API operation.\n@param [Hash] options\n
   \ * `:dry_run` - (Boolean) \n  * `:instance_ids` - *required* - (Array&lt;<String>)
   One or more instance IDs.\n@return [Core::Response] The `#data` method of the response
@@ -2135,9 +2175,10 @@
   launch from the AMI.\n@return [Core::Response] The `#data` method of the response
   object returns a hash with the following structure:\n\n  * `:image_id` - (String)"
 :reject_vpc_peering_connection: "Calls the RejectVpcPeeringConnection API operation.\n@param
-  [Hash] options\n  * `:vpc_peering_connection_id` - (String) \n@return [Core::Response]
-  The `#data` method of the response object returns a hash with the following structure:\n\n
-  \ * `:return` - (Boolean)"
+  [Hash] options\n  * `:dry_run` - (Boolean) \n  * `:vpc_peering_connection_id` -
+  (String) The ID of the VPC peering connection.\n@return [Core::Response] The `#data`
+  method of the response object returns a hash with the following structure:\n\n  *
+  `:return` - (Boolean)"
 :release_address: "Calls the ReleaseAddress API operation.\n@param [Hash] options\n
   \ * `:dry_run` - (Boolean) \n  * `:public_ip` - (String) [EC2-Classic] The Elastic
   IP address.\n  * `:allocation_id` - (String) [EC2-VPC] The allocation ID.\n@return
@@ -2172,7 +2213,8 @@
   CIDR of an existing route in the table.\n  * `:gateway_id` - (String) The ID of
   an Internet gateway attached to your VPC.\n  * `:instance_id` - (String) The ID
   of a NAT instance in your VPC.\n  * `:network_interface_id` - (String) The ID of
-  a network interface.\n  * `:vpc_peering_connection_id` - (String) \n@return [Core::Response]"
+  a network interface.\n  * `:vpc_peering_connection_id` - (String) The ID of a VPC
+  peering connection.\n@return [Core::Response]"
 :replace_route_table_association: "Calls the ReplaceRouteTableAssociation API operation.\n@param
   [Hash] options\n  * `:dry_run` - (Boolean) \n  * `:association_id` - *required*
   - (String) The association ID.\n  * `:route_table_id` - *required* - (String) The
@@ -2240,18 +2282,19 @@
   \     * `i2.8xlarge`\n      * `hi1.4xlarge`\n      * `hs1.8xlarge`\n      * `c1.medium`\n
   \     * `c1.xlarge`\n      * `c3.large`\n      * `c3.xlarge`\n      * `c3.2xlarge`\n
   \     * `c3.4xlarge`\n      * `c3.8xlarge`\n      * `cc1.4xlarge`\n      * `cc2.8xlarge`\n
-  \     * `g2.2xlarge`\n      * `cg1.4xlarge`\n    * `:placement` - (Hash) The placement
-  information for the instance.\n      * `:availability_zone` - (String) The Availability
-  Zone.\n      * `:group_name` - (String) The Availability Zone group name.\n    *
-  `:kernel_id` - (String) The ID of the kernel.\n    * `:ramdisk_id` - (String) The
-  ID of the RAM disk.\n    * `:block_device_mappings` - (Array&lt;<Hash>) One or more
-  block device mapping entries.\n      * `:virtual_name` - (String) The virtual device
-  name.\n      * `:device_name` - (String) The device name exposed to the instance
-  (for example, /dev/sdh).\n      * `:ebs` - (Hash) Parameters used to automatically
-  set up Amazon EBS volumes when the instance is launched.\n        * `:snapshot_id`
-  - (String) The ID of the snapshot.\n        * `:volume_size` - (Integer) The size
-  of the volume, in GiB. Constraints: If the volume type is io1, the minimum size
-  of the volume is 10 GiB. Default: If you're creating the volume from a snapshot
+  \     * `g2.2xlarge`\n      * `cg1.4xlarge`\n      * `r3.large`\n      * `r3.xlarge`\n
+  \     * `r3.2xlarge`\n      * `r3.4xlarge`\n      * `r3.8xlarge`\n    * `:placement`
+  - (Hash) The placement information for the instance.\n      * `:availability_zone`
+  - (String) The Availability Zone.\n      * `:group_name` - (String) The Availability
+  Zone group name.\n    * `:kernel_id` - (String) The ID of the kernel.\n    * `:ramdisk_id`
+  - (String) The ID of the RAM disk.\n    * `:block_device_mappings` - (Array&lt;<Hash>)
+  One or more block device mapping entries.\n      * `:virtual_name` - (String) The
+  virtual device name.\n      * `:device_name` - (String) The device name exposed
+  to the instance (for example, /dev/sdh).\n      * `:ebs` - (Hash) Parameters used
+  to automatically set up Amazon EBS volumes when the instance is launched.\n        *
+  `:snapshot_id` - (String) The ID of the snapshot.\n        * `:volume_size` - (Integer)
+  The size of the volume, in GiB. Constraints: If the volume type is io1, the minimum
+  size of the volume is 10 GiB. Default: If you're creating the volume from a snapshot
   and don't specify a volume size, the default is the snapshot size.\n        * `:delete_on_termination`
   - (Boolean) Indicates whether the Amazon EBS volume is deleted on instance termination.\n
   \       * `:volume_type` - (String) The volume type. Default: standard  Valid values
@@ -2404,48 +2447,52 @@
   which you can get by calling DescribeImages.\n  * `:min_count` - *required* - (Integer)
   The minimum number of instances to launch. If you specify a minimum that is more
   instances than Amazon EC2 can launch in the target Availability Zone, Amazon EC2
-  launches no instances. Constraints: Between 1 and the maximum number allowed for
-  your account (the default for each account is 20, but this limit can be increased).\n
-  \ * `:max_count` - *required* - (Integer) The maximum number of instances to launch.
-  If you specify more instances than Amazon EC2 can launch in the target Availability
-  Zone, Amazon EC2 launches the largest possible number of instances above MinCount.
-  Constraints: Between 1 and the maximum number allowed for your account (the default
-  limit for each account is 20, but this limit can be increased).\n  * `:key_name`
-  - (String) The name of the key pair. You can create a key pair using CreateKeyPair
-  or ImportKeyPair. If you launch an instance without specifying a key pair, you can't
-  connect to the instance.\n  * `:security_groups` - (Array&lt;<String>) [EC2-Classic,
-  default VPC] One or more security group names. For a nondefault VPC, you must use
-  security group IDs instead. Default: Amazon EC2 uses the default security group.\n
-  \ * `:security_group_ids` - (Array&lt;<String>) One or more security group IDs.
-  You can create a security group using CreateSecurityGroup. Default: Amazon EC2 uses
-  the default security group.\n  * `:user_data` - (String) The Base64-encoded MIME
-  user data for the instances.\n  * `:instance_type` - (String) The instance type.
-  For more information, see Instance Types in the Amazon Elastic Compute Cloud User
-  Guide. Default: m1.small  Valid values include:\n    * `t1.micro`\n    * `m1.small`\n
-  \   * `m1.medium`\n    * `m1.large`\n    * `m1.xlarge`\n    * `m3.medium`\n    *
-  `m3.large`\n    * `m3.xlarge`\n    * `m3.2xlarge`\n    * `m2.xlarge`\n    * `m2.2xlarge`\n
-  \   * `m2.4xlarge`\n    * `cr1.8xlarge`\n    * `i2.xlarge`\n    * `i2.2xlarge`\n
-  \   * `i2.4xlarge`\n    * `i2.8xlarge`\n    * `hi1.4xlarge`\n    * `hs1.8xlarge`\n
-  \   * `c1.medium`\n    * `c1.xlarge`\n    * `c3.large`\n    * `c3.xlarge`\n    *
-  `c3.2xlarge`\n    * `c3.4xlarge`\n    * `c3.8xlarge`\n    * `cc1.4xlarge`\n    *
-  `cc2.8xlarge`\n    * `g2.2xlarge`\n    * `cg1.4xlarge`\n  * `:placement` - (Hash)
-  The placement for the instance.\n    * `:availability_zone` - (String) The Availability
-  Zone of the instance.\n    * `:group_name` - (String) The name of the placement
-  group the instance is in (for cluster compute instances).\n    * `:tenancy` - (String)
-  The tenancy of the instance (if the instance is running in a VPC). An instance with
-  a tenancy of dedicated runs on single-tenant hardware.  Valid values include:\n
-  \     * `default`\n      * `dedicated`\n  * `:kernel_id` - (String) The ID of the
-  kernel. We recommend that you use PV-GRUB instead of kernels and RAM disks. For
-  more information, see PV-GRUB: A New Amazon Kernel Image in the Amazon Elastic Compute
-  Cloud User Guide.\n  * `:ramdisk_id` - (String) The ID of the RAM disk.\n  * `:block_device_mappings`
-  - (Array&lt;<Hash>) The block device mapping.\n    * `:virtual_name` - (String)
-  The virtual device name.\n    * `:device_name` - (String) The device name exposed
-  to the instance (for example, /dev/sdh).\n    * `:ebs` - (Hash) Parameters used
-  to automatically set up Amazon EBS volumes when the instance is launched.\n      *
-  `:snapshot_id` - (String) The ID of the snapshot.\n      * `:volume_size` - (Integer)
-  The size of the volume, in GiB. Constraints: If the volume type is io1, the minimum
-  size of the volume is 10 GiB. Default: If you're creating the volume from a snapshot
-  and don't specify a volume size, the default is the snapshot size.\n      * `:delete_on_termination`
+  launches no instances. Constraints: Between 1 and the maximum number you're allowed
+  for the specified instance type. For more information about the default limits,
+  and how to request an increase, see How many instances can I run in Amazon EC2 in
+  the Amazon EC2 General FAQ.\n  * `:max_count` - *required* - (Integer) The maximum
+  number of instances to launch. If you specify more instances than Amazon EC2 can
+  launch in the target Availability Zone, Amazon EC2 launches the largest possible
+  number of instances above MinCount. Constraints: Between 1 and the maximum number
+  you're allowed for the specified instance type. For more information about the default
+  limits, and how to request an increase, see How many instances can I run in Amazon
+  EC2 in the Amazon EC2 General FAQ.\n  * `:key_name` - (String) The name of the key
+  pair. You can create a key pair using CreateKeyPair or ImportKeyPair. If you launch
+  an instance without specifying a key pair, you can't connect to the instance.\n
+  \ * `:security_groups` - (Array&lt;<String>) [EC2-Classic, default VPC] One or more
+  security group names. For a nondefault VPC, you must use security group IDs instead.
+  Default: Amazon EC2 uses the default security group.\n  * `:security_group_ids`
+  - (Array&lt;<String>) One or more security group IDs. You can create a security
+  group using CreateSecurityGroup. Default: Amazon EC2 uses the default security group.\n
+  \ * `:user_data` - (String) The Base64-encoded MIME user data for the instances.\n
+  \ * `:instance_type` - (String) The instance type. For more information, see Instance
+  Types in the Amazon Elastic Compute Cloud User Guide. Default: m1.small  Valid values
+  include:\n    * `t1.micro`\n    * `m1.small`\n    * `m1.medium`\n    * `m1.large`\n
+  \   * `m1.xlarge`\n    * `m3.medium`\n    * `m3.large`\n    * `m3.xlarge`\n    *
+  `m3.2xlarge`\n    * `m2.xlarge`\n    * `m2.2xlarge`\n    * `m2.4xlarge`\n    * `cr1.8xlarge`\n
+  \   * `i2.xlarge`\n    * `i2.2xlarge`\n    * `i2.4xlarge`\n    * `i2.8xlarge`\n
+  \   * `hi1.4xlarge`\n    * `hs1.8xlarge`\n    * `c1.medium`\n    * `c1.xlarge`\n
+  \   * `c3.large`\n    * `c3.xlarge`\n    * `c3.2xlarge`\n    * `c3.4xlarge`\n    *
+  `c3.8xlarge`\n    * `cc1.4xlarge`\n    * `cc2.8xlarge`\n    * `g2.2xlarge`\n    *
+  `cg1.4xlarge`\n    * `r3.large`\n    * `r3.xlarge`\n    * `r3.2xlarge`\n    * `r3.4xlarge`\n
+  \   * `r3.8xlarge`\n  * `:placement` - (Hash) The placement for the instance.\n
+  \   * `:availability_zone` - (String) The Availability Zone of the instance.\n    *
+  `:group_name` - (String) The name of the placement group the instance is in (for
+  cluster compute instances).\n    * `:tenancy` - (String) The tenancy of the instance
+  (if the instance is running in a VPC). An instance with a tenancy of dedicated runs
+  on single-tenant hardware.  Valid values include:\n      * `default`\n      * `dedicated`\n
+  \ * `:kernel_id` - (String) The ID of the kernel. We recommend that you use PV-GRUB
+  instead of kernels and RAM disks. For more information, see PV-GRUB: A New Amazon
+  Kernel Image in the Amazon Elastic Compute Cloud User Guide.\n  * `:ramdisk_id`
+  - (String) The ID of the RAM disk.\n  * `:block_device_mappings` - (Array&lt;<Hash>)
+  The block device mapping.\n    * `:virtual_name` - (String) The virtual device name.\n
+  \   * `:device_name` - (String) The device name exposed to the instance (for example,
+  /dev/sdh).\n    * `:ebs` - (Hash) Parameters used to automatically set up Amazon
+  EBS volumes when the instance is launched.\n      * `:snapshot_id` - (String) The
+  ID of the snapshot.\n      * `:volume_size` - (Integer) The size of the volume,
+  in GiB. Constraints: If the volume type is io1, the minimum size of the volume is
+  10 GiB. Default: If you're creating the volume from a snapshot and don't specify
+  a volume size, the default is the snapshot size.\n      * `:delete_on_termination`
   - (Boolean) Indicates whether the Amazon EBS volume is deleted on instance termination.\n
   \     * `:volume_type` - (String) The volume type. Default: standard  Valid values
   include:\n        * `standard`\n        * `io1`\n      * `:iops` - (Integer) The

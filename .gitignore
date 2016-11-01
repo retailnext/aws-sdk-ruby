@@ -1,12 +1,15 @@
 /.bundle
 /Gemfile.lock
-/doc
+/api-docs
+/api-docs.zip
 /.yardoc
 /coverage
 /pkg
 /vendor
 /samples/config.yml
 *.gem
+/.ruby-*
+/.rvm
 
 # credentials for testing features against live services
 /.ruby_sdk_test_config.yml

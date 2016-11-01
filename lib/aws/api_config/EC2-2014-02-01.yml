@@ -17,6 +17,8 @@
 - :name: AcceptVpcPeeringConnection
   :method: :accept_vpc_peering_connection
   :inputs:
+    DryRun:
+    - :boolean
     VpcPeeringConnectionId:
     - :string
   :outputs:
@@ -1044,6 +1046,8 @@
 - :name: CreateVpcPeeringConnection
   :method: :create_vpc_peering_connection
   :inputs:
+    DryRun:
+    - :boolean
     VpcId:
     - :string
     PeerVpcId:
@@ -1322,6 +1326,8 @@
 - :name: DeleteVpcPeeringConnection
   :method: :delete_vpc_peering_connection
   :inputs:
+    DryRun:
+    - :boolean
     VpcPeeringConnectionId:
     - :string
   :outputs:
@@ -3126,6 +3132,8 @@
 - :name: DescribeVpcPeeringConnections
   :method: :describe_vpc_peering_connections
   :inputs:
+    DryRun:
+    - :boolean
     VpcPeeringConnectionId:
     - :list:
       - :string
@@ -3938,6 +3946,8 @@
 - :name: RejectVpcPeeringConnection
   :method: :reject_vpc_peering_connection
   :inputs:
+    DryRun:
+    - :boolean
     VpcPeeringConnectionId:
     - :string
   :outputs:

@@ -22,6 +22,20 @@ module AWS
   #       :access_key_id => '...',
   #       :secret_access_key => '...')
   #
+  # # Supported API Version
+  #
+  # Please note, the `AWS::DynamoDB` classes have been built against
+  # the 2011-12-05 API version. Constructing a `AWS::DynamoDB` object
+  # with a newer API version will emit a warning and then ignore the
+  # specified version.
+  #
+  # If you would like to use features of the newer 2012-08-10 API
+  # version, then please construct a DynamoDB client and use the
+  # client API directly.
+  #
+  #     # supports the latest API version
+  #     ddb = AWS::DynamoDB::Client.new(api_verison:'2012-08-10')
+  #
   # # Tables
   #
   # Tables contain items, and organize information into discrete
@@ -124,10 +138,12 @@ module AWS
 
     endpoint_prefix 'dynamodb'
 
+    IGNORING_API_SPECIFIED_MSG = "WARNING: Ignoring DynamoDB API version specified because only '2011-12-05' is supported by this class.  To use another version of the API, invoke the lower level AWS::DynamoDB::Client explicitly."
 
     def initialize options = {}
       options = options.dup
       options[:dynamo_db] ||= {}
+      warn(IGNORING_API_SPECIFIED_MSG) if options[:dynamo_db][:api_version]
       options[:dynamo_db][:api_version] = '2011-12-05'
       super(options)
     end

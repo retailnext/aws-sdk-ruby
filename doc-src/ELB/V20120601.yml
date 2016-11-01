@@ -1,4 +1,12 @@
 ---
+:add_tags: |-
+  Calls the AddTags API operation.
+  @param [Hash] options
+    * `:load_balancer_names` - *required* - (Array&lt;<String>) The name of the load balancer to tag. You can specify a maximum of one load balancer name.
+    * `:tags` - *required* - (Array&lt;<Hash>) A list of tags for each load balancer.
+      * `:key` - *required* - (String) The key of the tag.
+      * `:value` - (String) The value of the tag.
+  @return [Core::Response]
 :apply_security_groups_to_load_balancer: |-
   Calls the ApplySecurityGroupsToLoadBalancer API operation.
   @param [Hash] options
@@ -50,17 +58,20 @@
 :create_load_balancer: |-
   Calls the CreateLoadBalancer API operation.
   @param [Hash] options
-    * `:load_balancer_name` - *required* - (String) The name associated with the load balancer. The name must be unique within your set of load balancers.
-    * `:listeners` - *required* - (Array&lt;<Hash>) A list of the following tuples: LoadBalancerPort, InstancePort, and Protocol.
+    * `:load_balancer_name` - *required* - (String) The name associated with the load balancer. The name must be unique within your set of load balancers, must have a maximum of 32 characters, and must only contain alphanumeric characters or hyphens.
+    * `:listeners` - *required* - (Array&lt;<Hash>) A list of the following tuples: Protocol, LoadBalancerPort, InstanceProtocol, InstancePort, and SSLCertificateId. For information about the protocols and the ports supported by Elastic Load Balancing, see Listener Configurations for Elastic Load Balancing.
       * `:protocol` - *required* - (String) Specifies the load balancer transport protocol to use for routing - HTTP, HTTPS, TCP or SSL. This property cannot be modified for the life of the load balancer.
-      * `:load_balancer_port` - *required* - (Integer) Specifies the external load balancer port number. This property cannot be modified for the life of the load balancer.
+      * `:load_balancer_port` - *required* - (Integer) Specifies the port on which the load balancer is listening - 25, 80, 443, 465, 587, or 1024-65535. This property cannot be modified for the life of the load balancer.
       * `:instance_protocol` - (String) Specifies the protocol to use for routing traffic to back-end instances - HTTP, HTTPS, TCP, or SSL. This property cannot be modified for the life of the load balancer. If the front-end protocol is HTTP or HTTPS, InstanceProtocol has to be at the same protocol layer, i.e., HTTP or HTTPS. Likewise, if the front-end protocol is TCP or SSL, InstanceProtocol has to be TCP or SSL. If there is another listener with the same InstancePort whose InstanceProtocol is secure, i.e., HTTPS or SSL, the listener's InstanceProtocol has to be secure, i.e., HTTPS or SSL. If there is another listener with the same InstancePort whose InstanceProtocol is HTTP or TCP, the listener's InstanceProtocol must be either HTTP or TCP.
-      * `:instance_port` - *required* - (Integer) Specifies the TCP port on which the instance server is listening. This property cannot be modified for the life of the load balancer.
+      * `:instance_port` - *required* - (Integer) Specifies the port on which the instance server is listening - 25, 80, 443, 465, 587, or 1024-65535. This property cannot be modified for the life of the load balancer.
       * `:ssl_certificate_id` - (String) The ARN string of the server certificate. To get the ARN of the server certificate, call the AWS Identity and Access Management UploadServerCertificate API.
     * `:availability_zones` - (Array&lt;<String>) A list of Availability Zones. At least one Availability Zone must be specified. Specified Availability Zones must be in the same EC2 Region as the load balancer. Traffic will be equally distributed across all zones. You can later add more Availability Zones after the creation of the load balancer by calling EnableAvailabilityZonesForLoadBalancer action.
     * `:subnets` - (Array&lt;<String>) A list of subnet IDs in your VPC to attach to your load balancer. Specify one subnet per Availability Zone.
     * `:security_groups` - (Array&lt;<String>) The security groups to assign to your load balancer within your VPC.
-    * `:scheme` - (String) The type of a load balancer. By default, Elastic Load Balancing creates an Internet-facing load balancer with a publicly resolvable DNS name, which resolves to public IP addresses. For more informationabout Internet-facing and Internal load balancers, see Internet-facing and Internal Load Balancers. Specify the value internal for this option to create an internal load balancer with a DNS name that resolves to private IP addresses. This option is only available for load balancers created within EC2-VPC.
+    * `:scheme` - (String) The type of a load balancer. By default, Elastic Load Balancing creates an Internet-facing load balancer with a publicly resolvable DNS name, which resolves to public IP addresses. For more information about Internet-facing and Internal load balancers, see Internet-facing and Internal Load Balancers. Specify the value internal for this option to create an internal load balancer with a DNS name that resolves to private IP addresses. This option is only available for load balancers created within EC2-VPC.
+    * `:tags` - (Array&lt;<Hash>) A list of tags to assign to the load balancer. For more information about setting tags for your load balancer, see Tagging.
+      * `:key` - *required* - (String) The key of the tag.
+      * `:value` - (String) The value of the tag.
   @return [Core::Response] The `#data` method of the response object returns a hash with the following structure:
 
     * `:dns_name` - (String)
@@ -68,11 +79,11 @@
   Calls the CreateLoadBalancerListeners API operation.
   @param [Hash] options
     * `:load_balancer_name` - *required* - (String) The name of the load balancer.
-    * `:listeners` - *required* - (Array&lt;<Hash>) A list of LoadBalancerPort, InstancePort, Protocol, and SSLCertificateId items.
+    * `:listeners` - *required* - (Array&lt;<Hash>) A list of LoadBalancerPort, InstancePort, Protocol, InstanceProtocol, and SSLCertificateId items.
       * `:protocol` - *required* - (String) Specifies the load balancer transport protocol to use for routing - HTTP, HTTPS, TCP or SSL. This property cannot be modified for the life of the load balancer.
-      * `:load_balancer_port` - *required* - (Integer) Specifies the external load balancer port number. This property cannot be modified for the life of the load balancer.
+      * `:load_balancer_port` - *required* - (Integer) Specifies the port on which the load balancer is listening - 25, 80, 443, 465, 587, or 1024-65535. This property cannot be modified for the life of the load balancer.
       * `:instance_protocol` - (String) Specifies the protocol to use for routing traffic to back-end instances - HTTP, HTTPS, TCP, or SSL. This property cannot be modified for the life of the load balancer. If the front-end protocol is HTTP or HTTPS, InstanceProtocol has to be at the same protocol layer, i.e., HTTP or HTTPS. Likewise, if the front-end protocol is TCP or SSL, InstanceProtocol has to be TCP or SSL. If there is another listener with the same InstancePort whose InstanceProtocol is secure, i.e., HTTPS or SSL, the listener's InstanceProtocol has to be secure, i.e., HTTPS or SSL. If there is another listener with the same InstancePort whose InstanceProtocol is HTTP or TCP, the listener's InstanceProtocol must be either HTTP or TCP.
-      * `:instance_port` - *required* - (Integer) Specifies the TCP port on which the instance server is listening. This property cannot be modified for the life of the load balancer.
+      * `:instance_port` - *required* - (Integer) Specifies the port on which the instance server is listening - 25, 80, 443, 465, 587, or 1024-65535. This property cannot be modified for the life of the load balancer.
       * `:ssl_certificate_id` - (String) The ARN string of the server certificate. To get the ARN of the server certificate, call the AWS Identity and Access Management UploadServerCertificate API.
   @return [Core::Response]
 :create_load_balancer_policy: |-
@@ -142,6 +153,11 @@
       * `:connection_draining` - (Hash)
         * `:enabled` - (Boolean)
         * `:timeout` - (Integer)
+      * `:connection_settings` - (Hash)
+        * `:idle_timeout` - (Integer)
+      * `:additional_attributes` - (Array<Hash>)
+        * `:key` - (String)
+        * `:value` - (String)
 :describe_load_balancer_policies: |-
   Calls the DescribeLoadBalancerPolicies API operation.
   @param [Hash] options
@@ -174,7 +190,8 @@
   Calls the DescribeLoadBalancers API operation.
   @param [Hash] options
     * `:load_balancer_names` - (Array&lt;<String>) A list of load balancer names associated with the account.
-    * `:marker` - (String) An optional parameter reserved for future use.
+    * `:marker` - (String) An optional parameter used for pagination of results from this call. If specified, the response includes only records beyond the marker.
+    * `:page_size` - (Integer) The number of results returned in each page. The default is 400. You cannot specify a page size greater than 400 or less than 1.
   @return [Core::Response] The `#data` method of the response object returns a hash with the following structure:
 
     * `:load_balancer_descriptions` - (Array<Hash>)
@@ -219,6 +236,17 @@
       * `:created_time` - (Time)
       * `:scheme` - (String)
     * `:next_marker` - (String)
+:describe_tags: |-
+  Calls the DescribeTags API operation.
+  @param [Hash] options
+    * `:load_balancer_names` - *required* - (Array&lt;<String>) The names of the load balancers.
+  @return [Core::Response] The `#data` method of the response object returns a hash with the following structure:
+
+    * `:tag_descriptions` - (Array<Hash>)
+      * `:load_balancer_name` - (String)
+      * `:tags` - (Array<Hash>)
+        * `:key` - (String)
+        * `:value` - (String)
 :detach_load_balancer_from_subnets: |-
   Calls the DetachLoadBalancerFromSubnets API operation.
   @param [Hash] options
@@ -250,7 +278,7 @@
     * `:load_balancer_attributes` - *required* - (Hash) Attributes of the load balancer.
       * `:cross_zone_load_balancing` - (Hash) The name of the load balancer attribute. If enabled, the load balancer routes the request traffic evenly across all back-end instances regardless of the Availability Zones. For more information, see Enable Cross-Zone Load Balancing.
         * `:enabled` - *required* - (Boolean) Specifies whether cross-zone load balancing is enabled for the load balancer.
-      * `:access_log` - (Hash) The name of the load balancer attribute. If enabled, the load balancer captures detailed information of all the requests and delivers the information to the Amazon S3 bucket you specify. For more information, see Enable Access Logs.
+      * `:access_log` - (Hash) The name of the load balancer attribute. If enabled, the load balancer captures detailed information of all the requests and delivers the information to the Amazon S3 bucket that you specify. For more information, see Enable Access Logs.
         * `:enabled` - *required* - (Boolean) Specifies whether access log is enabled for the load balancer.
         * `:s3_bucket_name` - (String) The name of the Amazon S3 bucket where the access logs are stored.
         * `:emit_interval` - (Integer) The interval for publishing the access logs. You can specify an interval of either 5 minutes or 60 minutes. Default: 60 minutes
@@ -258,6 +286,11 @@
       * `:connection_draining` - (Hash) The name of the load balancer attribute. If enabled, the load balancer allows existing requests to complete before the load balancer shifts traffic away from a deregistered or unhealthy back-end instance. For more information, see Enable Connection Draining.
         * `:enabled` - *required* - (Boolean) Specifies whether connection draining is enabled for the load balancer.
         * `:timeout` - (Integer) Specifies the maximum time (in seconds) to keep the existing connections open before deregistering the instances.
+      * `:connection_settings` - (Hash) The name of the load balancer attribute. By default, Elastic Load Balancing maintains a 60-second idle connection timeout for both front-end and back-end connections of your load balancer. If the ConnectionSettings attribute is set, Elastic Load Balancing will allow the connections to remain idle (no data is sent over the connection) for the specified duration. For more information, see Configure Idle Connection Timeout.
+        * `:idle_timeout` - *required* - (Integer) Specifies the time (in seconds) the connection is allowed to be idle (no data has been sent over the connection) before it is closed by the load balancer.
+      * `:additional_attributes` - (Array&lt;<Hash>) This parameter is reserved for future use.
+        * `:key` - (String) Reserved for future use.
+        * `:value` - (String) Reserved for future use.
   @return [Core::Response] The `#data` method of the response object returns a hash with the following structure:
 
     * `:load_balancer_name` - (String)
@@ -272,6 +305,11 @@
       * `:connection_draining` - (Hash)
         * `:enabled` - (Boolean)
         * `:timeout` - (Integer)
+      * `:connection_settings` - (Hash)
+        * `:idle_timeout` - (Integer)
+      * `:additional_attributes` - (Array<Hash>)
+        * `:key` - (String)
+        * `:value` - (String)
 :register_instances_with_load_balancer: |-
   Calls the RegisterInstancesWithLoadBalancer API operation.
   @param [Hash] options
@@ -282,6 +320,13 @@
 
     * `:instances` - (Array<Hash>)
       * `:instance_id` - (String)
+:remove_tags: |-
+  Calls the RemoveTags API operation.
+  @param [Hash] options
+    * `:load_balancer_names` - *required* - (Array&lt;<String>) The name of the load balancer. You can specify a maximum of one load balancer name.
+    * `:tags` - *required* - (Array&lt;<Hash>) A list of tag keys to remove.
+      * `:key` - (String) The name of the key.
+  @return [Core::Response]
 :set_load_balancer_listener_ssl_certificate: |-
   Calls the SetLoadBalancerListenerSSLCertificate API operation.
   @param [Hash] options

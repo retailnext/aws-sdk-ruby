@@ -526,6 +526,90 @@ module AWS::Core
                                    "expected string value for value at key foo of option foo")
             end
 
+            context 'maps of complex types' do
+
+              let(:descriptors) do
+                [{
+                 :map => {
+                   :key => [:string],
+                   :value => [
+                     {
+                       :structure => {
+                         'Color' => [:string],
+                         'Size' => [:string],
+                       }
+                     }
+                   ]
+                 }
+                }]
+              end
+
+              it 'serializes maps of structures' do
+                grammar.request_params(:foo => {
+                  "ProductA" => { :size => 'large', :color => 'red' },
+                }).map(&:to_s).sort.should == [
+                  Http::Request::Param.new("Foo.entry.1.key", "ProductA"),
+                  Http::Request::Param.new("Foo.entry.1.value.Size", "large"),
+                  Http::Request::Param.new("Foo.entry.1.value.Color", "red"),
+                ].map(&:to_s).sort
+              end
+
+            end
+
+            context 'flattened maps of complex types' do
+
+              let(:descriptors) do
+                [{
+                 :map => {
+                   :key => [:string],
+                   :value => [
+                     {
+                       :structure => {
+                         'Color' => [:string],
+                         'Size' => [:string],
+                       }
+                     }
+                   ],
+                   :key_param => 'ProductName',
+                   :value_param => 'Attributes',
+                   :flattened => true,
+                 }
+                }]
+              end
+
+              it 'serializes maps of structures' do
+                grammar.request_params(:foo => {
+                  "ProductA" => { :size => 'large', :color => 'red' },
+                }).map(&:to_s).sort.should == [
+                  Http::Request::Param.new("Foo.1.ProductName", "ProductA"),
+                  Http::Request::Param.new("Foo.1.Attributes.Size", "large"),
+                  Http::Request::Param.new("Foo.1.Attributes.Color", "red"),
+                ].map(&:to_s).sort
+              end
+
+              if RUBY_VERSION >= '1.9'
+                # no hash ordering in ruby 1.8.7
+                it 'numbers elements correctly' do
+                  grammar.request_params(:foo => {
+                    "ProductA" => { :size => 'large', :color => 'red' },
+                    "ProductB" => { :size => 'medium', :color => 'blue' },
+                    "ProductC" => { :size => 'small', :color => 'green' },
+                  }).map(&:to_s).sort.should == [
+                    Http::Request::Param.new("Foo.1.ProductName", "ProductA"),
+                    Http::Request::Param.new("Foo.1.Attributes.Size", "large"),
+                    Http::Request::Param.new("Foo.1.Attributes.Color", "red"),
+                    Http::Request::Param.new("Foo.2.ProductName", "ProductB"),
+                    Http::Request::Param.new("Foo.2.Attributes.Size", "medium"),
+                    Http::Request::Param.new("Foo.2.Attributes.Color", "blue"),
+                    Http::Request::Param.new("Foo.3.ProductName", "ProductC"),
+                    Http::Request::Param.new("Foo.3.Attributes.Size", "small"),
+                    Http::Request::Param.new("Foo.3.Attributes.Color", "green"),
+                  ].map(&:to_s).sort
+                end
+              end
+
+            end
+
             context 'hash format' do
 
               it 'should pass the hash as is' do

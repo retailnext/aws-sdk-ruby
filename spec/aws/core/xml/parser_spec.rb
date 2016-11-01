@@ -178,11 +178,8 @@ module AWS
             }
 
             it 'can convert the standard amazon format to a datetime object' do
-              data.date_time_like_element.should be_a(DateTime)
-              [
-                "2010-01-01T01:02:03+00:00",   # 1.8, 1.9.2
-                "2010-01-01T01:02:03+2952:00", # 1.9.3
-              ].should include(data.date_time_like_element.to_s)
+              value = data.date_time_like_element
+              value.should be_a(DateTime)
             end
 
             it 'can convert non standard amazon formats to datetime objects' do
@@ -207,7 +204,7 @@ module AWS
 
             it 'can convert the standard amazon format to a time object' do
               data.date_time_like_element.should be_a(Time)
-              data.date_time_like_element.to_s.should == Time.parse(time_string).to_s
+              data.date_time_like_element.strftime('%s.%6N').should == Time.parse(time_string).strftime('%s.%6N')
             end
 
             it 'can convert non standard amazon formats to time objects' do

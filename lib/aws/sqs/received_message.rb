@@ -36,8 +36,14 @@ module AWS
       # @return [String] An MD5 digest of the message body.
       attr_reader :md5
 
+      # @return [String] The request ID.
+      attr_reader :request_id
+
       # @api private
       attr_reader :attributes
+
+      # @return [String] The message attributes attached to the message.
+      attr_reader :message_attributes
 
       # @api private
       ATTRIBUTE_ALIASES = {
@@ -53,7 +59,9 @@ module AWS
         @handle = handle
         @body = opts[:body]
         @md5 = opts[:md5]
+        @request_id = opts[:request_id]
         @attributes = opts[:attributes] || {}
+        @message_attributes = opts[:message_attributes] || {}
         super
       end
 
@@ -110,7 +118,7 @@ module AWS
       # extend the timeout of a message in an existing queue to more
       # than a total visibility timeout of 12 hours. (For more
       # information visibility timeout, see
-      # [Visibility Timeout](http://docs.amazonwebservices.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/IntroductionArticle.html#AboutVT)
+      # [Visibility Timeout](http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/IntroductionArticle.html#AboutVT)
       # in the Amazon SQS Developer Guide.)
       #
       # For example, let's say the timeout for the queue is 30
